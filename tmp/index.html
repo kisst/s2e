@@ -1,0 +1,30 @@
+<html>
+
+<head>
+<script type="text/javascript" src="js/fileLoad_v2.js"></script>
+<script type="text/javascript">
+function gotoLogin()
+{
+  document.cookie = "testcookie";
+  cookieEnabled = (document.cookie.indexOf("testcookie") != -1) ? true : false;
+  if (cookieEnabled == false)
+  {
+    alert("Browser does not accept cookies. Please configure your browser to accept cookies in order to access the Web Interface.");
+  }
+  else
+  {
+      document.cookie = "testcookie; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  }
+
+  var fileVer = (new Date().getTime());
+  var url = "login.html?aj4="+fileVer;
+  url = url + '&bj4=' + md5(url.split('?')[1]);
+  window.location.href=url;
+}
+</script>
+</head>
+<body onload="gotoLogin();">
+</body>
+
+</html>
+

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<link rel="stylesheet" href="ssov2/css/sso.css">
+<link rel="shortcut icon" href="images/favicon.ico">
+<link rel="preload" href="ssov2/font/AvenirNextLTPro-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<script type="text/javascript" src="js/funcs.js"></script>
+<script type="text/javascript" src="js/sso.js"></script>
+<script type="text/javascript" src="js/utility.js"></script>
+<script type="text/javascript" src="js/linux.js"></script>
+<script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie-1.4.1.min.js"></script>
+<script type="text/javascript" src="js/underscore-1.5.1.min.js"></script>
+<script type="text/javascript" src="js/backbone-1.0.0.min.js"></script>
+<script type="text/javascript" src="js/fileLoad_v2.js"></script>
+<script>
+var guest="0";
+var hasInternet="0";
+var isFirstTime="0"; //isFirstTime=1:Day Zero; isFirstTime=0:Day After;
+var sso_error="0";
+var sso_sessId="";
+var netgear_sso_url="https://accounts.netgear.com/";
+
+/* IE FIX */
+if (!window.location.origin) {
+  window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+}
+var redirect_home_after_login=window.location.origin + "/cgi/setup.cgi";
+var redirect_login_after_reg=window.location.origin + "/cgi/register.cgi";
+var sso_error_msg="";
+var dev_sn = "";
+var dev_id = "";
+var fileVer = 'ff1217f';
+var RootFrame = true;
+var MockupMode = true;
+var currLang = $.cookie("cookie_language");
+var data;
+var regKeyMsg;
+var remainTimes;
+
+if ('file:' == document.location.protocol)
+  MockupMode = true;
+else
+  MockupMode = false;
+
+if (MockupMode ===  true)
+    fileLoad("js/url_mockup.html", "js");
+else
+    fileLoad("js/url.js", "js");
+
+var loginAuthing = false;
+var data;
+
+fileLoad("js/rollover.js", "js");
+fileLoad("js/utility.js", "js");
+fileLoad("js/xui_enhancements.js", "js");
+
+if (typeof(currLang) == "undefined" || currLang == null)
+{
+  $.cookie("cookie_language","defLang", {"path": "/;SameSite=Lax"});
+  currLang = "defLang";
+}
+
+fileLoad("lang/" + currLang + ".js", "js");
+fileLoad("lang/" + currLang + "_help.js", "js");
+
+if (MockupMode) {
+    fileVer = (new Date().getTime());
+}
+
+var ssoLoginMessages = undefined;
+var currentSelectionTypeName = undefined;
+
+function adjustElementsByLanaguage()
+{
+    switch(currLang) {
+        case "ja":
+            $(".RegKey").css("padding-top", "0px");
+            break;
+        case "de":
+            $(".RegKey").css("padding-top", "0px");
+            $("#ssoLoginButton").css("left", "175px");
+            $("#ssoLoginButton").css("width", "450px");
+            break;
+        case "zh":
+            $(".RegKey").css("padding-top", "0px");
+            $("#ssoLoginButton").css("left", "205px");
+            $("#ssoLoginButton").css("width", "400px");
+            break;
+    }
+}
+
+function ssoInitMsgs()
+{
+    ssoLoginMessages = {
+        "officalRegister" : {
+            "optionTitle": lang('sso', 'txtSsoOfficalRegistrationOptionTitle'),
+            "optionMsg": lang('sso', 'txtSsoOfficalRegisrtationOptionMsg'),
+            "position": "leftLoginOptions",
+            "webPanels": ["ssoLogin", "ssoNetworkLoginDiv", "registerNoticeBlock"],
+            "hidePanels": [],
+        },
+        "registrationKey" : {
+            "optionTitle": lang('sso', 'txtSsoEnterRegistrationKeyOptionTitle'),
+            "optionMsg": lang('sso', 'txtSsoEnterRegistrationKeyOptionMessage'),
+            "position": "leftLoginOptions",
+            "webPanels": ["ssoLogin", "ssoRegKeyLoginOnlineDiv", "registerNoticeBlock"],
+            "hidePanels": ["otherDescription"],
+        },
+        /*
+        "limitedAccess" : {
+            "optionTitle": lang('sso', 'txtSsoLimitedAccessOptionTitle'),
+            "optionMsg":  lang('sso', 'txtSsoLimitedAccessOptionMessage'),
+            "position": "midLoginOptions",
+            "webPanels": ["localLogin", "ssoLocalLimitedAccess"]
+        },*/
+        "fullAccess" : {
+            "optionTitle": lang('sso', 'txtSsofullAccessTitle'),
+            "optionMsg":  lang('sso', 'txtSsofullAccessOptionMessage'),
+            "position": "rightLoginOptions",
+            "webPanels": ["localLogin", /*"ssoLocalFullAccess", "loginRemainDiv" */],
+            "hidePanels": ["otherDescription"],
+        },
+    };
+}
+
+/* Click the options and do corresponding actions
+ * divId - the name of options DIV.
+ * typeName - the typeName which should can be found in ssoLoginMessages
+ */
+function clickUnregisteredOptions(divId, typeName)
+{   
+    /* Disable all web panels belong to current selected type */
+    if (currentSelectionTypeName !== undefined) {
+        $.each(ssoLoginMessages[currentSelectionTypeName].webPanels, function(idx, value) {
+            $("#" + value).hide();
+        });
+    }
+    
+    /* Show all web panels belong to current selected type */
+    if (typeName !== undefined) {
+        $.each(ssoLoginMessages[typeName].webPanels, function(idx, value) {
+            $("#" + value).show();
+        });
+
+        $('#password').focus();
+        $('#ssoOnlineRegKey').focus();
+    }
+        
+    /* Replace the clicked options with currentSelection type */
+    if (divId !== undefined) {
+
+        if ((hasInternet === "1" && currentSelectionTypeName !== "officalRegister") ||
+            (hasInternet === "0" && currentSelectionTypeName !== "registrationKey"))
+        {
+            $("#" + divId + " .infoOptionsTitle").remove();
+            $("#" + divId + " .infoOptionsMsg").remove();
+                
+            renderUnregisteredOptions(divId, (hasInternet === "1") ? "officalRegister" : "registrationKey");
+            
+            /* Switch the currentSelectionTypeName back to its own place */
+            divId = ssoLoginMessages[currentSelectionTypeName].position;
+        }
+        
+        if ($("#" + divId).prop("disabled") !== "disabled")
+        {
+            $("#" + divId + " .infoOptionsTitle").remove();
+            $("#" + divId + " .infoOptionsMsg").remove();
+        
+            renderUnregisteredOptions(divId, currentSelectionTypeName);
+        }
+    }
+    
+    /* Now, update the current selected type name */
+    currentSelectionTypeName = typeName;
+    
+    /* Finally, disable those options which is specified to be hidden */
+    $.each(ssoLoginMessages[currentSelectionTypeName].hidePanels, function(idx, value) {
+        $("#" + value).hide();
+    });
+}
+
+/* Render the options if DUT is not registered.
+ * divId - the name of options DIV.
+ * typeName - the typeName which should can be found in ssoLoginMessages
+ */
+function renderUnregisteredOptions(divId, typeName)
+{
+    var parentObj = $("#" + divId);
+    
+    var titleSpan = $(document.createElement('div'));
+    var msgSpan = $(document.createElement('div'));
+    
+    titleSpan.attr("class", "infoOptionsTitle");
+    titleSpan.html(ssoLoginMessages[typeName].optionTitle);
+    
+    msgSpan.attr("class", "infoOptionsMsg");
+    msgSpan.html(ssoLoginMessages[typeName].optionMsg);
+    
+    parentObj.append(titleSpan);
+    parentObj.append(msgSpan);
+    
+    /* Register click function */
+    parentObj.unbind("click");
+    parentObj.click(function() {
+        clickUnregisteredOptions(divId, typeName);
+    });
+}
+
+/* To disable the unregistered options.
+ * Including make it become unclickable.
+ */
+function disableUnregisteredOptions(divId)
+{
+    var obj = $("#" + divId);
+    
+    /* Disable click event and make cursor become normal state */
+    obj.unbind("click");
+    obj.css("cursor", "auto");
+    obj.prop("disabled", "disabled");
+    
+    /* Make this option grayed */
+    obj.children().css("color", "#c0c0c0");
+}
+
+/* Normal HTML */
+
+(function($) {
+    var getPropSize = function(name) {
+        return Math.max(document.documentElement["client" + name],
+                document.documentElement["scroll" + name],
+                document.body["scroll" + name]);
+    }
+
+    $.fn.trueWidth = function() {
+        return ((/*$.browser.msie && */this.get()[0].nodeType === 9) ? getPropSize('Width') : this.width());
+    };
+    $.fn.trueHeight = function() {
+        return ((/*$.browser.msie && */this.get()[0].nodeType === 9) ? getPropSize('Height') : this.height());
+    };
+})(jQuery);
+
+function loginPageLoad() {
+    $(document).ready(function() {
+        $(window).resize(resize);
+    });
+
+    resize();
+    
+    /* Initialize SSO web page */
+    $("#hidePwd").click(switchPasswordType);
+    $("#showPwd").click(switchPasswordType);
+
+    $(".infolinkQuestion").click(function() {
+        addInformationHelpPopup(this.id, "infoPopup", "infoPopupMsg");
+    });
+
+    initInformation();
+    initSso();
+
+    /* Always show sso login at begining */
+    $("#ssoLogin").hide();
+    $("#localLogin").hide();
+    /* Decide which div we should display */
+    if (isFirstTime === "1") {
+        if (hasInternet === "1") {
+            clickUnregisteredOptions(undefined, "officalRegister");
+            renderUnregisteredOptions("leftLoginOptions", "registrationKey");
+        } else {
+            clickUnregisteredOptions(undefined, "registrationKey");
+            renderUnregisteredOptions("leftLoginOptions", "officalRegister");
+            disableUnregisteredOptions("leftLoginOptions");
+        }
+        
+        $("#ssoOnlineRegKey").keyup(function(e) {
+            if (e.keyCode == 13 && loginAuthing == false)
+                register('ssoOnlineRegKey', 'ssoOnlineRegKeyErrMsg');
+        });
+        
+        /* Render remaining options */
+        //renderUnregisteredOptions("midLoginOptions", "limitedAccess");
+        renderUnregisteredOptions("rightLoginOptions", "fullAccess");
+        
+        if(remainTimes <= 0)
+            disableUnregisteredOptions("rightLoginOptions");
+        
+        $("#otherDescription").show();
+        
+    } else {
+        showLocalLogin();
+    }
+    
+    /* Render options complete, now adjust their height to be fit */
+    var highestHeight = 0;
+    
+    /* Adjust de lanaguage first */
+    if (currLang === "de") {
+        $.each(ssoLoginMessages, function(idx, obj) {
+            $("#" + obj.position).css("width", "310px");
+            $("#" + obj.position).css("margin", "15px");
+            });
+    }
+    
+    $.each(ssoLoginMessages, function(idx, obj) {
+        var value = parseInt($("#" + obj.position).css("height").replace("px", ""));
+        highestHeight = highestHeight < value ? value : highestHeight
+    });
+    
+    $.each(ssoLoginMessages, function(idx, obj) {
+        $("#" + obj.position).css("height", (highestHeight) + "px");
+    });
+    
+
+    /* Some elements is independent from SSO status */
+    renderElemenetsIfInternetConnected();
+    
+    /* Adjust the elements css according to the current langauge */
+    adjustElementsByLanaguage();
+}
+
+
+function initInformation() {
+    /* Initialzie System Information */
+    var msg = "<b>" + lang('sso', 'txtSsoIpAddr') + "</b>  "+ data.ip + "<br>" +
+              "<b>" + lang('sso', 'txtSsoSn') + "</b>  " + data.sn  + "<br>" +
+              "<b>" + lang('sso', 'txtSsoMac') + "</b>  " +data.mac + "<br>";
+
+    $("#sysInfo").attr("data-msg", msg);
+              
+    /* Initialize WEB title */
+    $(document).attr('title', data.title);
+    
+    /* Initialize Device name and FW version */
+    $("#deviceName").html(data.modelName);
+    $("#fwVersion").html(data.fwVer);
+    $("#currenYear").html(data.copyrightYear);
+}
+
+function renderElemenetsIfInternetConnected() {
+    if (hasInternet === "1") {
+        $("#searchDiv").css("visibility", "visible");
+        $(".footerContentLeft").show();
+    } else {
+        $("#searchDiv").css("visibility", "hidden");
+        $(".footerContentLeft").hide();
+        $("#localRegKeyDiv").show();
+    }
+}
+
+function switchPasswordType() {
+    if (this.id === "hidePwd") {
+        $("#hidePwd").hide();
+        $("#showPwd").show();
+        $("#password").prop({type : "text"});
+    } else {
+        $("#hidePwd").show();
+        $("#showPwd").hide();
+        $("#password").prop({type : "password"});
+    }
+}
+
+function showLocalLogin() {
+    /* show local panel first */
+    $("#localLogin").show();
+    $("#ssoLogin").hide();
+    $('#password').focus();
+}
+
+function refreshIfOk(resp) {
+    if (resp.status === "ok")
+        window.location.reload();
+    else
+        regKeyMsg.html(str2var(resp.msg));
+}
+
+function register(id, errId) {
+    var keyRegex = /^[a-fA-F0-9]{5}$/g;
+    var key = $('#' + id).val();
+    regKeyMsg = $('#' + errId);
+    if (keyRegex.test(key) === false) {
+        regKeyMsg.html(lang('err', 'errActKeyInvalidFormat'));
+        return false;
+    }
+
+    $('#pwd').val("");
+    $('#actKeyText').val(key);
+    
+    {
+        var __url = url('set_maintainActivationKey.html') + '&dummy=' + (new Date().getTime());
+        var _data = formDataGet('setform');
+
+        __url = urlParamHash(__url);
+        var Datas = Backbone.Model.extend({
+            url : __url,
+            parse : function(resp, xhr) {
+                    refreshIfOk(resp);
+                    return;
+            }
+        });
+        
+        var dataModel = new Datas();
+        dataModel.save(_data, {});
+    }
+}
+
+
+
+/* Add a popup windown to show information 
+ * Three arguements are required: 
+ id             - the ID of parent 
+ containerCSS   - the style of major panel. (including X button on right side)
+ msgCSS         - the style of message.
+ */
+function addInformationHelpPopup(id, containerCSS, msgCSS) {
+
+    var obj = $("#" + id)[0];
+    var msg = obj.getAttribute("data-msg");
+    var containerId = id + "_infoHelpPopup";
+
+    /* Check if this help is already shown */
+    if ($("#" + containerId).length)
+        return;
+    
+    /* Create popup container */
+    var msgSpanContainer = $(document.createElement('span'));
+    msgSpanContainer.attr({
+        "id" : containerId,
+        "class" : containerCSS
+    });
+
+    /* Create close div */
+    var closeDiv = $("<div class='closeInfoHelp'></div>");
+    var img = $("<img src='ssov2/images/closeHelp.png'>").click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $("#" + containerId).remove();
+    });
+    closeDiv.append(img);
+
+    /* Set message (store in data-msg) */
+    var msgSpan = $(document.createElement('span'));
+    msgSpan.attr("class", msgCSS);
+    msgSpan.html(msg);
+
+    msgSpanContainer.append(closeDiv);
+    msgSpanContainer.append(msgSpan);
+    $(obj).append(msgSpanContainer);
+}
+
+function checkSearchInput(e) {
+    if (e.keyCode == 13)
+        do_search();
+}
+
+function resize() {
+    var overflow = $(window).trueHeight() < $(document).trueHeight();
+
+    if (overflow == true) {
+        $('#footer_image').css({
+            "height" : '408px',
+            "position" : 'static'
+        });
+        $('#branding_text').css({
+            "position" : "absolute",
+            "top" : '745px'
+        });
+    } else {
+        $('#footer_image').css({
+            "position" : "fixed",
+            "bottom" : 0,
+            "right" : 0,
+            "left" : 0,
+            "top" : ''
+        });
+        $('#branding_text').css({
+            "position" : "fixed",
+            "bottom" : 0,
+            "right" : 0,
+            "left" : 0,
+            "top" : ''
+        });
+    }
+}
+/* Normal HTML END*/
+
+if (typeof (currLang) == "undefined" || currLang == null) {
+    $.cookie("cookie_language", "defLang", {"path": "/;SameSite=Lax"});
+    currLang = "defLang";
+}
+
+function showLoginFail(reason) {
+    var msg = IsUndefOrNull(reason) ? lang('err', 'errLoginFail') : reason;
+    $('#errMsg').html(msg);
+}
+
+function initSso() {
+    dev_sn = data.sn;
+    dev_id = data.modelName;
+    isFirstTime = data.isFirstTime; //isFirstTime=1:Day Zero; isFirstTime=0:Day After;
+    sso_sessId = data.ssoSessionId;
+    netgear_sso_url = data.ssoUrl;
+}
+
+function checkLoginStatus() {
+    dataGet(url('get_loginStatus.html')).fetch({
+        success : function(model, resp) {
+            if (resp.data.status == "fail") {
+                var errstr = str2var(resp.data.failReason);
+                $('#password').val("");
+                showLoginFail(errstr);
+                $("#local_login").prop('disabled', false);
+                loginAuthing = false;
+            } else if (resp.data.status == "ok") {
+                if (IsUndefOrNull(resp.data.sess)) {
+                    showLoginFail();
+                    $("#local_login").prop('disabled', false);
+                    loginAuthing = false;
+                    return;
+                }
+                if (resp.data.firstLogin === true)
+                    var _url = "chg_password.html?aj4=" + fileVer;
+                else
+                    var _url = "home.html?aj4=" + fileVer + (currentSelectionTypeName === "fullAccess" ? "&reqFullAccess" : "");
+                
+                if (isFirstTime === "1" && hasInternet === "1")
+                    _url += "&hasInternet"
+                    
+                _url = urlParamHash(_url);
+                set_cookie("tabid", resp.data.sess);
+                top.location.href = _url;
+            } else {
+                setTimeout(checkLoginStatus, 1000);
+            }
+        },
+        error : function(model, resp) {
+            setTimeout(checkLoginStatus, 1000);
+        }
+    });
+}
+
+function checkData() {
+    var cf = document.language_form;
+    var language_var = getSelected(cf.language);
+
+    if (language_var != cf.h_language.value) {
+        setTimeout(function() {
+            dataToHidden(cf);
+            cf.language.disabled = "disabled";
+            cf.submit();
+            return true;
+        }, 10);
+
+    } else {
+        return false;
+    }
+}
+
+window.onresize = function() {
+    load_sso_top_value();
+}
+
+function init() {
+    /* Check internet connection */
+    $.ajax({
+        url: "https://www.netgear.com",
+        dataType: "script",
+        timeout: 3000,
+        success: function(xhr) {
+            hasInternet = "1";
+            $("#searchDiv").css("visibility", "visible");
+            $(".footerContentLeft").show();
+        },
+    });
+    
+    fileLoginLoadWait();
+    
+    var mainView = Backbone.View.extend({
+        el : '#main_container',
+        template : _.template($('#main_content').html()),
+        initialize : function() {
+            this.render();
+        },
+        render : function() {
+            var that = this;
+            dataGet(url('get_loginInfo.html')).fetch({
+                success : function(model, resp) {
+                    logoutCheck(resp);
+                    data = resp.data;
+    
+                    if (!MockupMode && (currLang != data.langName)) {
+                        $.cookie("cookie_language", data.langName, {"path": "/;SameSite=Lax"});
+                        currLang = data.langName;
+                        location.reload(true);
+                        return;
+                    }
+    
+                    if ("" != urlParamGetByName('error_code'))
+                        sso_error = urlParamGetByName('error_code');
+    
+                    $(document).attr('title', data.title);
+                    if (!MockupMode)
+                        window.history.pushState(null, data.title, 'index.html');
+
+                    /* Initi SSO message before render pages */
+                    ssoInitMsgs();
+                    
+                    remainTimes = resp.data.loginRemainTimes;
+                    that.$el.html(that.template(resp));
+                    loginPageLoad(data);
+                    load_sso_top_value();
+                    $('#setform').replaceWith('<fo'+'rm id="setform" action="/cgi/set.cgi">' + $('#setform').html() +'</form>');
+    
+                    sso_error = parseInt(sso_error);
+                    if (sso_error >= 2 && sso_error <= 18)
+                        alert(lang('sso', 'txtSsoErr' + sso_error));
+                    else if (sso_error === 2200)
+                        alert(lang('sso', 'txtSsoErr2200', [data.modelName]));
+                }
+            });
+        },
+        events : {
+            'click #local_login' : 'login',
+            'keyup #password'    : 'checkInput',
+            'keyup #search_key'  : 'checkSearchInput',
+        },
+        login : function(e) {
+            if (MockupMode) {
+                var password = $('#password').val();
+                if (password == '')
+                    top.location.href = "home.html?aj4=" + fileVer;
+                else
+                    showLoginFail();
+            } else {
+                if (loginAuthing)
+                    return;
+
+                $('#pwd').val(encode($('#password').val()));
+                var __url = url('set_loginAuth.html') + '&dummy=' + (new Date().getTime());
+                var _data = formDataGet('setform');
+    
+                $("#local_login").prop('disabled', true);
+                loginAuthing = true;
+    
+                __url = urlParamHash(__url);
+                var Datas = Backbone.Model.extend({
+                    url : __url,
+                    parse : function(resp, xhr) {
+                        var responseJSON = xhr.xhr.responseJSON;
+                        if (responseJSON.status === "error") {
+                            alert(str2var(responseJSON.msg));
+                            window.location.href = "index-2.html";
+                        } else {
+                            checkLoginStatus();
+                            return;
+                        }
+                    }
+                });
+                
+                var dataModel = new Datas();
+                dataModel.save(_data, {});
+            }
+        },
+        checkInput : function(e) {
+            if (e.keyCode == 13 && loginAuthing == false)
+                this.login();
+        }
+    });
+
+    mainFrame = new mainView();
+}
+</script>
+
+</head>
+<body onload="init();">
+<div id="main_container" class="mainContainer"></div>
+<script id="main_content" type="text/template">
+  <div class="topframe">
+    <div id="logo"></div>
+    <div id="searchDiv" style="visibility:hidden;">
+      <img src="ssov2/images/search.png" style="padding-right: 5px; margin-left: auto;">
+      <input type="search" placeholder="<%= lang('sso', 'txtSsoSearchHelp') %>" class="searchText" id="search_key" onkeyup="checkSearchInput(event);">
+      <input type="button" value="<%= lang('common', 'txtSearch') %>" class="searchButton" id="search_btn" onclick="do_search()">
+    </div>
+
+  </div>
+  <div class="container_center">
+    <div class="deviceInformation">
+    <span id="deviceName"></span><br>
+    <span><%= lang('sso', 'txtSsoFwVer')%>&nbsp;</span>&nbsp;<span id="fwVersion"></span><br>
+    <span onclick="javascript:addInformationHelpPopup('sysInfo', 'sysInfoPopup', 'sysInfoMsg');" id="sysInfo" data-msg="" ><%= lang('sso', 'txtSsoSysInfo')%></span>
+   </div>  
+    <!-- Local Login Session -->
+    <div id="localLogin">
+        <div id="ssolocalLoginAccessDiv" class="loginTopDiv">
+            <div class="loginTopTitle"><%= lang('sso', 'txtSsoLocalLoginTitle') %></div>
+                <span id="ssoLocalFullAccess" style="display:none">
+                    <div class="ssoLocalSubtitle"><%= lang('sso', 'txtSsofullAccessTitle') %></div>
+                    <%= lang('sso', 'txtSsofullAccessMessage') %>
+                </span>
+                <span id="ssoLocalLimitedAccess" style="display:none">
+                    <div class="ssoLocalSubtitle"><%= lang('sso', 'txtSsoLimitedAccessTitle') %></div>
+                    <%= lang('sso', 'txtSsoLimitedAccessMessage') %>
+                </span>
+            <div id="passwordDescription">
+                <span id="localOnly"><%= lang('sso', 'txtSsoDevicePassword') %></span>
+            </span>
+            </div>
+        </div>
+        <div id="passwordField">
+            <input type="password" placeholder="" class="password" autocomplete="off" id="password" name="password" maxlength="64">
+            <img id="hidePwd" src="ssov2/images/hidePwd.png">
+            <img id="showPwd" src="ssov2/images/showPwd.png" style="display:none;">
+            <hr id="passwordHr">
+            <div id="errMsg" class="inlineError"></div>
+        </div>
+    
+        <div id="setform" style="display:none">
+            <input type="hidden" name="pwd" id="pwd">
+            <input type="hidden" name="actKeyText" id="actKeyText">
+        </div>
+    
+        <div>
+            <input type="button" class="button1" id="local_login" value="<%= lang('sso', 'txtSsoLogin') %>">
+            <div id="loginRemainDiv" style="display:none">
+                (<%= lang('sso', 'txtSsoFullAccessRemain') %> : <%= remainTimes %>)
+            </div>
+        </div>
+    </div>
+
+    <!-- SSO Login Session -->
+    <div id="ssoLogin">
+        <!-- SSO Network Login buttons -->
+        <div id="ssoNetworkLoginDiv" class="loginTopDiv" style="display:none">
+            <div id="ssoUnlockFeature" class="loginTopTitle"><%= lang('sso', 'txtSsoLoginTitle') %></div>
+            <%= lang('sso', 'txtSsoToUnlock') %>
+            <div>
+                <input type="button" id="ssoLoginButton" value='<%= lang('sso', 'txtSsoLoginWithNtgrAcct') %>' onclick="onSignInWithNetgearAccount();">
+            </div>
+            <div id="ntgrOnlineLoginDescription"><%= lang('sso', 'txtSsoRedirectToNTGR') %></div> 
+            <div id="ntgrAccounts" style="display: none">
+                <div class="accounts alignRight">
+                    <a href="javascript:onCreateNewNetgearAccount();"><%= lang('sso', 'txtSsoCreateNewAcct') %></a>
+                </div>
+                <div class="seperatorLink"></div>
+                <div class="accounts alignLeft">
+                    <a target="_blank" href="https://www.netgear.com/mynetgear/forgotpassword.aspx"><%= lang('sso', 'txtSsoForgotPwd') %></a>
+                </div>
+            </div>
+        
+        </div>
+
+        <!-- Registration Key -->
+        <div id="ssoRegKeyLoginOnlineDiv" class="loginTopDiv" style="display:none">
+            <div>
+            <div class="loginTopTitle"><%= lang('sso', 'txtSsoEnterRegistrationKey') %></div>
+             <%= lang('sso', 'txtSsoEnterRegistrationKeyHelp') %>
+             <div><%= lang('sso', 'txtSsoRegisterRequirement') %></div>
+            </div>
+            <input type="text" class="RegKey" id="ssoOnlineRegKey" name="RegKey" maxlength="5" value="">
+            <hr id="RegKeyHr">
+            <div id="ssoOnlineRegKeyErrMsg" class="inlineError2"></div>
+                <input type="button" value="<%= lang('actKey', 'btnActivate') %>" class="button1 register_btn" onclick="register('ssoOnlineRegKey', 'ssoOnlineRegKeyErrMsg');">
+            </div>
+        </div>
+    </div>
+  </div>
+
+    <!-- Show other 3 options -->
+  <div id="otherDescription" style="display:none">
+    <p><%= lang('sso', 'txtSsoOr') %></p>
+        
+    <!-- Create 3 options here -->
+    <div onselectstart="return false" id="leftLoginOptions" class="infoOptions noselect">
+    </div>
+    <div onselectstart="return false" id="rightLoginOptions" class="infoOptions noselect">
+    </div>
+    
+  </div>
+
+  <div id="registerNoticeBlock" style="display:none"><%= lang('sso', 'txtSsoRegisterNotice') %></div> 
+  
+  <!-- Common Fields -->
+  <div class="footer">
+  	<hr class=footerHr>
+  	<div class="footerContentLeft" style="display:none">
+  	  <span class="footerInfo">
+        <a target="_blank" href="https://community.netgear.com/t5/English/ct-p/English"><%= lang('sso', 'txtSsoCommunity')%></a>
+        <a target="_blank" href="https://www.netgear.com/about/terms-and-conditions"><%= lang('sso', 'txtSsoTermOfUse')%></a>
+        <a target="_blank" href="https://www.netgear.com/about/privacy-policy"><%= lang('sso', 'txtSsoPrivacy')%></a>
+        <a target="_blank" href="https://www.netgear.com/support"><%= lang('sso', 'txtSsoHelpSupport')%></a>
+    </span>
+    </div>
+    <div class="footerContentRight">
+      &copy; 1996 - <span id="currenYear"></span> NETGEAR<sup>&reg;</sup>
+    </div>
+  </div>
+</script>
+</body>
+
+</html>
+

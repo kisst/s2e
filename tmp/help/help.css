@@ -1,0 +1,192 @@
+/* css for help pages */
+
+.help_top
+{
+  background: url(../images/Help_layer_topfacet.png) ;
+  background-position-x: left 154px;
+  background-position-y: top;
+  background-repeat: no-repeat;
+  background-position: left 154px top no-repeat transparent;
+  color: #666666;
+}
+
+.container
+{
+  color: #666666;
+  padding-left: 10px;
+  padding-right: 20px;
+  font-size-adjust:none;
+  font-stretch:normal;
+  font-family:Arial,Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-style:normal;
+  font-variant:normal;
+  font-weight: normal;
+}
+
+.container > h1
+{
+  display : none;
+}
+
+.container > h2
+{
+  font-size-adjust:none;
+  font-stretch:normal;
+  font-family:Arial,Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-style:normal;
+  font-variant:normal;
+  font-weight: normal;
+  color: #672e8f;
+  margin: 0px;
+  padding-bottom: 20px;
+}
+
+.container > h3
+{
+  font-size-adjust:none;
+  font-stretch:normal;
+  font-family:Arial,Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-style:normal;
+  font-weight: normal;
+  font-variant:normal;
+  color: #666666;
+  margin: 0px;
+  margin-bottom: 20px;
+  padding-left: 10px;
+  background-image: url(../images/Left_nav_bullets_black.gif);
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+
+.container > ul
+{
+  list-style: none;
+  padding-left: 0px;
+  font-size-adjust:none;
+  font-stretch:normal;
+  font-family:Arial,Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-style:normal;
+  font-weight: normal;
+  font-variant:normal;
+}
+
+.container > ul > li > b
+{
+  font-weight: normal;
+  font-size-adjust:none;
+  font-stretch:normal;
+  font-family:Arial,Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-style:normal;
+  font-weight: normal;
+  font-variant:normal;
+}
+
+.container > ul > ul
+{
+  list-style: none;
+  padding-left: 0px;
+  font-size-adjust:none;
+  font-stretch:normal;
+  font-family:Arial,Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-style:normal;
+  font-weight: normal;
+  font-variant:normal;
+}
+
+.container > ul > ul > li
+{
+  padding-left: 10px;
+  padding-bottom: 26px;
+  font-size-adjust:none;
+  font-stretch:normal;
+  font-family:Arial,Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-style:normal;
+  font-weight: normal;
+  font-variant:normal;
+}
+
+.container > ul > ul > li > b
+{
+  font-weight: normal;
+  font-size-adjust:none;
+  font-stretch:normal;
+  font-family:Arial,Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-style:normal;
+  font-weight: normal;
+  font-variant:normal;
+}
+
+.container > hr
+{
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 20px;
+  color: #e7e5e4;
+  font-size-adjust:none;
+  font-stretch:normal;
+  font-family:Arial,Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-style:normal;
+  font-weight: normal;
+  font-variant:normal;
+}
+.overflowY
+{
+  overflow-y: hidden;
+}
+
+.contentTextPadding
+{
+  padding-bottom: 20px;
+}
+.contentTitlePadding
+{
+  padding-bottom: 20px;
+}
+
+.popupSize
+{
+  min-width: 400px;
+  min-height: 400px;
+}
+
+.popupHeaderPadding
+{
+  padding-bottom:10px;
+  padding-left:10px;
+}
+
+.popupFooterPadding
+{
+  padding-left:10px;
+  padding-bottom:5px;
+}
+
+.helpFooterStyle
+{
+  font: 9pt Arial;
+  color: #b2a79f;
+}
+
+.helpFooterDim
+{
+  height: 30px;
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 10px;
+}
+
+.helpBodyStyle
+{
+  border: 1px solid #e7e5e4;
+  margin-right: 10px;
+  margin-left: 10px;
+}

@@ -1,0 +1,436 @@
+<html>
+
+<head>
+<title></title>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="tabid" content="">
+<link rel="shortcut icon" href="images/favicon.ico">
+<!--[if IE]>
+<link rel=stylesheet type="text/css" href="css/ie.css">
+<![endif]-->
+<link rel=stylesheet type="text/css" href="css/jquery-ui-1.10.3.custom.min.css">
+<script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie-1.4.1.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.10.3.custom.js"></script>
+<script type="text/javascript" src="js/underscore-1.5.1.min.js"></script>
+<script type="text/javascript" src="js/backbone-1.0.0.min.js"></script>
+<script type="text/javascript" src="js/jquery.nanoscroller.min.js"></script>
+<script type="text/javascript" src="js/fileLoad_v2.js"></script>
+<script type="text/javascript" src="js/crypt/jsbn.js"></script>
+<script type="text/javascript" src="js/crypt/prng4.js"></script>
+<script type="text/javascript" src="js/crypt/rng.js"></script>
+<script type="text/javascript" src="js/crypt/rsa.js"></script>
+<script type="text/javascript" src="js/crypt/base64.js"></script>
+<script>
+var fileVer = 'ff1217f';
+var RootFrame = true;
+var MockupMode = false;
+var currLang = $.cookie("cookie_language");
+var devLagNum;
+var devPortNum;
+var modelDescp;
+var data;
+var selEntries_Lang = null;
+var orgLangName = 'en';
+var selLangName = 'en';
+var modulus = '';
+var tabid = null;
+var sess = '';
+var alertCb = null;
+var noticeShow = false;
+var stopMonitor = false;
+var xsrfId = null;
+var hidePopupName = '';
+var queryString = '';
+var ssoUrl;
+var ssoSessionId;
+var ssoHasInternet = false;
+var ssoRegistered = false;
+
+fileLoad("css/style.css", "css");
+fileLoad("css/nanoscroller.css", "css");
+fileLoad("css/ng8xui.css", "css");
+fileLoad("js/rollover.js", "js");
+fileLoad("js/home.js", "js");
+fileLoad("js/utility.js", "js");
+fileLoad("js/ng_style.js", "js");
+fileLoad("js/xui_enhancements.js", "js");
+fileLoad("js/ng_tabs_Layer2.js", "js");
+fileLoad("js/ng_topNav.js", "js");
+fileLoad("js/ng_sideNav.js", "js");
+fileLoad("js/ng_collapse.js", "js");
+
+
+if (typeof(currLang) == "undefined" || currLang == null)
+{
+  $.cookie("cookie_language","defLang", {"path": "/;SameSite=Lax"});
+  currLang = "defLang";
+} 
+
+fileLoad("lang/"+currLang+".js", "js");
+fileLoad("lang/"+currLang+"_help.js", "js");
+
+if ('file:' == document.location.protocol)
+  MockupMode = true;
+else
+  MockupMode = false;
+
+if (MockupMode)
+{
+  fileVer = (new Date().getTime());
+  fileLoad("js/url_mockup.html", "js");
+}
+else
+{
+  fileLoad("js/url.js", "js");
+}
+
+function PopupCenter(url, title, w, h) {
+    // Fixes dual-screen position                         Most browsers      Firefox
+    var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+    var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+    var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+    var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+    var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+    var top = ((height / 2) - (h / 2)) + dualScreenTop;
+    var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+    // Puts focus on the newWindow
+    //if (window.focus) {
+        //newWindow.focus();
+    //}
+}
+
+function logout()
+{
+  if (!MockupMode) {
+    dataSet(url('set_logout.html'), formDataGet('setform'));
+    //_top.location.href = '/login.html?reason=logout';
+    _top.location.href = 'index.html';
+  } else {
+    _top.location.href = 'logina1ba.html?reason=logout';
+  }
+}
+
+$( window ).unload(function() {
+  logout();
+});
+
+function monitor()
+{
+  dataGet(url('get_monitor.html')).fetch({
+    success: function(model, resp){
+      logoutCheck(resp);
+      //alertShow = resp.data.logAlarm;
+      if (!stopMonitor)
+          setTimeout(monitor, 15000);
+    },
+    error: function(model, resp){
+      if (!stopMonitor)
+          setTimeout(monitor, 15000);
+    }
+  });
+}
+
+function langSelApply()
+{
+  dataSet(url('set_lang.html'), formDataGet('setform'));
+  currLang = GetSelectName(selLangName,selEntries_Lang);
+  $.cookie("cookie_language",currLang, {"path": "/;SameSite=Lax"});
+}
+
+function langSelCancel()
+{
+  $("#langSel").val(orgLangName);
+}
+
+function encryptStr(str)
+{
+  var encrypt = str;
+
+  //if (IsUndefOrNull(data.modulus) || '' == data.modulus)
+  //{
+  //  encrypt = encode(str);
+  //}
+  //else
+  {
+    var rsa = new RSAKey();
+    rsa.setPublic(modulus, '10001');
+    encrypt = hex2b64(rsa.encrypt(str));
+  }
+  return encrypt;
+}
+
+function init()
+{  
+  fileLoadWait();
+
+var mainView = Backbone.View.extend({
+  el: '#main_container',
+  template: _.template($('#main_content').html()),
+  initialize: function() {
+    this.render();
+  },
+  render: function() {
+    var that = this;
+
+    if (!MockupMode)
+    {
+      sessEnc = get_cookie("tabid");
+      if (IsUndefOrNull(sessEnc))
+      {
+          logout();
+          return;
+      }
+      sess = decode64(sessEnc);
+      tabid = sess.substring(0,32);
+      expo = sess.substring(32,37);
+      modulus = sess.substring(37, sess.length);
+      delete_cookie("tabid");
+
+      if (IsUndefOrNull(tabid))
+      {
+        logout();
+        return;
+      }
+
+      initTabid();
+    }
+    else
+    {
+
+    }
+
+    /* Check if user is using full access mode */
+    if (window.location.search.indexOf("reqFullAccess") !== -1)
+        queryString += '&reqFullAccess=1';
+    
+    if (window.location.search.indexOf("hasInternet") !== -1)
+        ssoHasInternet = true;
+        
+    dataGet(url('get_homePage.html') + queryString).fetch({
+      success: function(model, resp){
+        logoutCheck(resp);
+        data = resp.data;
+
+        selEntries_Lang = [[lang('common','txtAuto'),'auto']];
+        for (i = 0; i < data.langs.length; i++) {
+          selEntries_Lang.push(data.langs[i]);
+        }
+
+        orgLangName = data.langName;
+
+        if (!MockupMode && (currLang != data.langName))
+        {
+          $.cookie("cookie_language",data.langName, {"path": "/;SameSite=Lax"});
+          currLang = data.langName;
+
+          location.reload(true);
+          return;
+        }
+
+        PageTitleChange(data.title);
+        if (!MockupMode) {
+          window.history.pushState(null, data.title, 'index.html');
+        }
+        that.$el.html( that.template(resp));
+        devLagNum = data.lags.length;
+        devPortNum = data.ports.length - devLagNum - 1;
+        modelDescp = data.product;
+        xsrfId = data.xsrf;
+        hidePopupName = data.hidePopupName;
+        ssoUrl = data.ssoUrl;
+        ssoSessionId = data.ssoSessionId;
+        ssoRegistered = data.ssoRegistered;
+
+        /* VNGF-102 */
+        $('div#setform').replaceWith('<fo'+'rm id="setform" action="/cgi/set.cgi">' + $('#setform').html() +'</form>');
+        web_main_load();
+
+        var sn = data.sysSN;
+        var webURL = "https://my.netgear.com/Registration/deviceping.aspx?callback=?&amp;serial=";
+        webURL += sn;
+        var url_setRegistered = 'cgi/setf831.html?cmd=sys_registered';
+
+        if (0 == data.regStatus && 0 == data.state && !hasProdCfg('hasSSO'))
+        {
+          dataGet(webURL).fetch({
+            success: function(model, resp){
+              regData = resp.PingResult;
+              if (null != regData && 1 == regData[0].CBURegFlag)
+                dataSet(url_setRegistered, formDataGet('setform'));
+              else
+                PopupCenter('html/product_registration_popup.html', 'RegProduct', 455, 315);
+            }
+          });
+        }
+
+        //throw new Error("Here is my error!");
+
+        if (!MockupMode)
+          setTimeout(monitor, 15000);
+      }
+    });
+  },
+  events: {
+    'change #langSel':'langSelAct'
+  },
+  langSelAct: function(){
+    selLangName = GetSelectVal('langSel');
+
+    addConfirmDiv();
+    var $confirmDialog = top.$("#confirmDialog");
+    var func = "window[\"langSelApply\"]()";
+    var func_cancel = "window[\"langSelCancel\"]()";
+    top.$("#confirmDialogMsg").html(lang('alert','alertLangChange',[GetSelectName(orgLangName,selEntries_Lang),GetSelectName(selLangName,selEntries_Lang)]));
+    $confirmDialog.dialog(
+    {
+      autoOpen: true,
+      height: 202,
+      width: 400,
+      resizable: false,
+      modal: true,
+      close: function(event, ui)
+      {
+       deleteConfirmDiv();
+       window["langSelCancel"]();
+      }
+    });
+    top.$('a.cnlButton').html('<div class="ButtonsDiv">'+CreateEditblBtns(lang('common','btnCancel'), func_cancel+';deleteConfirmDiv();', 'confirm_Cancel', undefined, 'on')+'</div>');
+    top.$('a.msgButton').html('<div class="ButtonsDiv">'+CreateEditblBtns(lang('common','btnOK'), func+';deleteConfirmDiv();', 'confirm_OK', undefined, 'on')+'</div>');
+  }
+});
+
+mainFrame = new mainView();
+}
+</script>
+</head>
+<body class="mainPageBody paddingRight25 paddingLeft25 overflowYHidden" onLoad="init()">
+<div id="main_container"></div>
+
+<script id="main_content" type="text/template">
+<div id="setform" >
+  <div class="header">
+    <div class="topMainFrame topMainFrameIE">
+      <div class="netgearLogoPadding">
+          <a href="https://www.netgear.com/">
+            <img class="netgearLogo" width="138" src="images/Netgear-logo.png" title="Netgear"/></a>
+      </div>
+      <div class="separator13 aboveLogoSeparatorIE"></div>
+      <div>
+          <table cellpadding="0px" cellspacing="0px">
+            <tr>
+              <td>
+                <label class="productName lineHeightNormal">
+                  <%= show(data.product) %>
+                </label>
+              </td>
+              <td align="right">
+                <div>
+                  <% if (IsUndefOrNull(data.prodCfg.hasLang) || (!IsUndefOrNull(data.prodCfg.hasLang) && data.prodCfg.hasLang)) { %>
+                  <%= Select('langSel', (IsUndefOrNull(data.langAuto)?orgLangName:'auto'), selEntries_Lang) %>
+                  <% } %>
+                  <label>&nbsp;</label>
+                  <label class="welcomeLine"><%= lang('login','txtWelcome') %></label>
+                  <label class="userLine" style="margin-right: -5px;">admin</label>
+                  <img class="separatorPadding" src="images/separator.png" alt=""/>
+                  <img border="0" src="images/icon_logout.png" onclick="logout();" title="<%= lang('login','txtLogout') %>" style="cursor: pointer; height:16px; padding-bottom:4px;"/>
+                </div>
+              </td>
+            </tr>
+          </table>
+      </div>
+      <div class="separator4 underLogoSeparatorIE"></div>
+    </div>
+    <div class="topnav">
+      <table class="tableStyle">
+        <tr>
+          <td>
+            <table class="tableStyle">
+              <tr id="tabs" class="spacer100Percent lineHeightNormal"><%= drawHeadsTab(1) %></tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="9" class="separator1" />
+        </tr>
+      </table>
+    </div>
+    <div id="primaryNav" style="background-color: #8ad5f6;">
+      <table border="0" cellpadding="0" cellspacing="0" style="width: inherit;">
+        <tr>
+          <td id='cloneTd'></td>
+        </tr>
+        <tr id='subTubs' class="lineHeightNormal">
+        </tr>
+      </table>
+    </div>
+    <div class="separator3"></div>
+    <div align="right" class="separator25">
+      <table cellpadding="0px" cellspacing="0px">
+        <tr>
+          <td id="ButtonsDiv" class="ButtonsDiv" align="right"></td>
+        </tr>
+      </table>
+    </div>
+    <div class="separator3"></div>
+  </div>
+  <div class="content">
+    <table cellspacing="0px" cellpadding="0px">
+      <tr>
+        <td valign="top">
+          <table class="borderCollapce">
+          <tr>
+            <td id="sideNavMenuCaption">
+              <div class='sideNavMenuCaption'>
+                <label class='font_Nav_Fst' id="TreeCaption">
+                </label>
+              </div>
+            </td>
+            <td style="width: 5px"></td>
+            <td rowspan="2" class="frameContentPadding" id='frameId'>
+              <div class="contentNav contentNavFrameIE">
+                <div class="contentFrame paddingRight15 contentNavFrameIE" name="contentFrame" id="contentFrame">
+                  <iframe class="main_frame overflowYHidden" frameborder="no" src="" id="maincontent" name="maincontent" onload="sizing();disableOpenNewTab();"></iframe>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="sideNavFrame">
+              <div class="sidenav tmp" id="sideNavMenu">
+                <div class="frame padding2Left padding2Right" name="frame" id="frame">
+                  <table cellspacing="0px" cellpadding="0px" class="sideNavTableWidth">
+                    <tr>
+                      <td id="sideNavContentColumn">
+                        <table border="0" cellspacing="0" cellpadding="0" id="Tree">
+                          <tr>
+                            <td class="leftNavContent" id="TreeFrame"></td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td id="sideNavHiddenColumn"></td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="footer separator25 textAlignBottom">
+    <label class="textAlignBottom"><%= lang('login','txtCopyright', [data.copyrightYear]) %></label>
+  </div>
+</div>
+</script>
+
+</body>
+
+</html>

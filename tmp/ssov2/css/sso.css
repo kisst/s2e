@@ -1,0 +1,640 @@
+@font-face {
+    font-family: 'AvenirNext LT Pro Regular';
+    src: url('../font/AvenirNextLTPro-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+input[type=password]::-ms-reveal,
+input[type=password]::-ms-clear
+{
+    display: none;
+}
+
+.mainContainer {
+    width: 800px;
+    min-height: 800px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.topframe {
+    width: 100%;
+    height: 80px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+.container_center {
+    position: absolute;
+    width: 100%;
+    height: 670px;
+    background-color: white;
+    top: 10%;
+    margin-left: 0 auto;
+}
+
+.deviceInformation {
+    position: absolute;
+    background-color: transparent;
+    width: 100%;
+    top: 10px;
+    right: 10px;
+    text-align: right;
+    font-size: 10px;
+    color: #1C1D1E;
+    font-weight: 700;
+    line-height: 16px;
+
+}
+
+#deviceName {
+    font-size: 16px;
+    color: #8829C1;
+}
+
+.footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 50px;
+    background-color: transparent;
+    text-align: center;
+}
+
+.footerHr {
+    color: #c0c0c0;
+}
+
+.footerContentLeft {
+    position: absolute;
+    width: 80%;
+    color: #545556;
+    text-align: left;
+}
+
+.footerInfo {
+    font-size: 12px;
+    display: inline-block;
+    min-width: 150px;
+}
+
+.footerInfo > a,
+.footerInfo > a:visited {
+    padding-right: 30px;
+    color: #545556;
+}
+
+.footerContentRight {
+    position: absolute;
+    width: 20%;
+    min-width: 150px;
+    right: 0%;
+    font-size: 12px;
+    color: #545556;
+    letter-spacing: 0;
+    text-align: right;
+}
+
+#logo {
+    width: 210px;
+    height: 30px;
+    background-image: url(../images/SSO_NETGEAR_Genie.png);
+    position: absolute;
+    bottom: 10px;
+}
+
+#searchDiv {
+    height: 30px;
+    position: absolute;
+    right: 0;
+    display: table;
+    text-align:right;
+    bottom: 10px;
+}
+
+.searchButton {
+    width: 73px;
+    height: 30px;
+    background: #8829C1;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 27px;
+    font-family: AvenirNext LT Pro Regular;
+}
+
+.searchText {
+    height: 30px;
+    width: 150px;
+    font-size: 16px;
+    line-height: 27px;
+    border: none transparent;
+    outline: none;
+    border-bottom: 2px solid gray;
+    text-align: left;
+    background: transparent;
+}
+
+#localLabel {
+    top: 36px;
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    margin: auto;
+    font-size: 26px;
+    color: #000000;
+}
+
+#LimitedAccessNote {
+    top: 77px;
+    width: 100%;
+    height: 20px;
+    position: absolute;
+    line-height: 20px;
+    font-size: 14px;
+    color: #1C1D1E;
+    text-align: center;
+}
+
+#passwordDescription {
+    position: absolute;
+    top: 110px;
+    left: 180px;
+    width: 100%;
+    height: 20px;
+    font-size: 15px;
+    color: #1C1D1E;
+    line-height: 20px;
+    text-align: left;
+}
+
+#passwordField {
+    position: absolute;
+    top: 200px;
+    left: 180px;
+}
+
+.password {
+    width: 420px;
+    height: 20px;
+    outline: none;
+    border: none transparent;
+    font-size: 16px;
+    color: #6D6F70;
+}
+
+#passwordHr {
+    width: 450px;
+    border: 1px solid #DDDDDD;
+}
+
+#RegKeyHr {
+    width: 200px;
+    border: 1px solid #DDDDDD;
+    margin-block-start: 0;
+}
+
+.button1 {
+    left: 325px;
+    width: 150px;
+    height: 45px;
+    background-color: #8829C1;
+    border-radius: 7px;
+    font-size: 18px;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 30px;
+    font-family: AvenirNext LT Pro Regular;
+    cursor: pointer;
+}
+
+#local_login {
+    position: absolute;
+    top: 265px;
+}
+
+#loginRemainDiv {
+    position: absolute;
+    top: 315px;
+    width:100%;
+    text-align: center;
+}
+
+.register_btn {
+    top: 100px;
+}
+
+
+#toRegisteredDescirption {
+    position: absolute;
+    top: 350px;
+    left: 104px;
+    width: 512px;
+    height: 100px;
+    font-size: 14px;
+    color: #1C1D1E;
+    text-align: center;
+    line-height: 22px;
+    display: none;
+}
+
+#unlockFeatureDescription,
+#localRegKey {
+    font-size: 16px;
+    padding-bottom: 10px;
+}
+
+.loginTopDiv {
+    top: 70px;
+    height: 80px;
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    margin: auto;
+    color: #000000;
+    line-height: 19px;
+    font-size: 16px;
+}
+
+.loginTopTitle {
+    top: 100px;
+    font-size: 30px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    line-height: 30px;
+}
+
+#ssoLoginButton {
+    position: absolute;
+    top: 130px;
+    left: 225px;
+    width: 380px;
+    height: 55px;
+    background-color: #8829C1;
+    border-radius: 7px;
+    font-size: 18px;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 30px;
+    font-family: AvenirNext LT Pro Regular;
+    cursor: pointer;
+}
+
+#ntgrAccounts {
+    position: absolute;
+    top: 210px;
+    width: 100%;
+    height: 30px;
+    background-color: transparent;
+    font-size: 17px;
+    color: #8829C1;
+}
+
+#ntgrOnlineLoginDescription {
+    position: absolute;
+    top: 195px;
+    width: 100%;
+    height: 30px;
+    left: 10px;
+    background-color: transparent;
+    font-size: 15px;
+}
+
+.accounts {
+    width: 45%;
+    float: left;
+    cursor: pointer;
+    line-height: 30px;
+}
+
+.accounts.alignRight {
+    text-align: right;
+    margin-right: 3.5%;
+    padding-right: 1em;
+}
+
+.accounts.alignLeft {
+    text-align: left;
+    margin-left: 1%;
+    padding-left: 1em;
+}
+
+.seperatorLink {
+    width: 1%;
+    float: left;
+    height: 30px;
+    border-left: 1px solid #CCCCCC;
+}
+
+#otherDescription,
+#toRegisterDeivceMsg {
+    position: absolute;
+    top: 400px;
+    width: 100%;
+    height: 30px;
+    background-color: transparent;
+    font-size: 15px;
+    text-align: center;
+    display: table;
+}
+
+#otherDescription > span,
+#toRegisteredDescirption > span {
+    line-height: 20px;
+}
+
+#otherDescription > p {
+    font-size: 22px;
+    margin-block-start: 1.5em;
+    margin-block-end: 0.5em;
+}
+
+#localRegKeyDiv > p, 
+#ssoRegKeyLoginOnlineDiv > p,
+#toRegisterDeivceMsg > p {
+    font-size: 18px;
+    padding-top: 10px;
+}
+
+#toLocalLogin {
+    text-decoration: underline;
+}
+
+a {
+    outline: 0;
+}
+
+.RegKey {
+    width: 100px;
+    height: 40px;
+    outline: none;
+    border: none transparent;
+    font-size: 18px;
+    color: #6D6F70;
+    padding-left: 30px;
+    padding-top: 1em;
+    text-align: left;
+}
+
+#SsoEnterRegistrationKey {
+    padding-top: 1em;
+    font-size: 16px;
+}
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .infolinkQuestion::before {
+        content: "?";
+        display: inline-block;
+        font-weight: bold;
+        text-align: center;
+        width: 14px;
+        height: 14px;
+        font-size: 14px;
+        line-height: 1.4em;
+        border-radius: 1.5ex;
+        color: gray;
+        background: transparent;
+        border: 2px solid gray;
+        margin-left: 2px;
+    }
+}
+
+@supports not (-ms-high-contrast: none) {
+    .infolinkQuestion::before {
+        content: "?";
+        display: inline-block;
+        font-weight: bold;
+        text-align: center;
+        width: 14px;
+        height: 14px;
+        font-size: 14px;
+        line-height: 16px;
+        border-radius: 1.5ex;
+        color: gray;
+        background: transparent;
+        border: 2px solid gray;
+        margin-left: 2px;
+    }
+}
+
+.infolinkQuestion:hover:before {
+    color: white;
+    background: gray;
+    text-decoration: none;
+    cursor: pointer;
+    position: relative;
+    /* Pointer to make it look like hyper-link */
+}
+
+.infoPopup {
+    text-align: justify;
+    /* To overcome the text-align inherit from parent node */
+    line-height: justify;
+    position: relative; /* always show popup widow at fixed position */
+    display: inline-block;
+    vertical-align:top;
+    width: 170px;
+    height: 150px;
+    margin: 20px; /* Adjust list for location */
+    background: #FFFFFF;
+    border: 1px solid #c8aaf4;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.33);
+    border-radius: 5px;
+    padding: 10px;
+    padding-top: 5px;
+    cursor: pointer;
+}
+
+.infoPopTitle {
+    display: block;
+    background-color: transparent;
+    font-size: 15px;
+    font-weight:bold;
+    color: #8829C1;
+    text-align: left;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    text-align-last: left;
+    letter-spacing: 0;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+.infoPopupMsg {
+    display: block;
+    background-color: transparent;
+    font-size: 13px;
+    color: #6D6F70;
+    text-align: left;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    text-align-last: left;
+    letter-spacing: 0;
+    line-height: 1.5em;
+}
+
+/*** SSOv3 ***/
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
+}
+
+.infoOptions {
+    text-align: justify;
+    position: relative; /* always show popup widow at fixed position */
+    display: inline-block;
+    vertical-align:top;
+    width: 290px;
+    margin: 20px; /* Adjust list for location */
+    background: #FFFFFF;
+    border: 2px solid #d5bdf7;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.33);
+    border-radius: 5px;
+    #padding: 5px;
+    cursor: pointer;   
+}
+
+.infoOptionsTitle {
+    display: block;
+    background-color: #8829C1;
+    font-size: 16px;
+    font-weight:bold;
+    color: white;
+    text-align: center;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    letter-spacing: 0;
+    padding-top: 0.9em;
+    padding-bottom: 1.1em;
+    border-radius: 4px;
+    height: 25px;
+}
+
+.infoOptionsMsg {
+    display: block;
+    background-color: transparent;
+    font-size: 13px;
+    color: #6D6F70;
+    text-align: left;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    text-align-last: left;
+    letter-spacing: 0;
+    line-height: 1.5em;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-weight:bold;
+    padding-top: 0.5em;
+}
+
+.ssoLocalSubtitle {
+    font-size: 18px;
+    font-weight:bold;
+    padding-bottom: 0.3em;
+    padding-bottom: 0.1em;
+}
+
+.closeInfoHelp {
+    height: 15px;
+    text-align: right;
+    padding-bottom: 10px;
+}
+
+.closeInfoHelp>img {
+    cursor: pointer;
+}
+
+#sysInfo {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+    font-size: 10px;
+    position: relative;
+}
+
+.sysInfoPopup {
+    text-align: justify;
+    /* To overcome the text-align inherit from parent node */
+    line-height: justify;
+    position: absolute; /* always show popup widow at fixed position */
+    display: inline-block;
+    z-index: 1;
+    width: 260px;
+    margin-top: 20px; /* Adjust list for location */
+    margin-left: -10em;
+    background: #FFFFFF;
+    border: 1px solid #E4E9EB;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33);
+    border-radius: 5px;
+    padding: 10px;
+    padding-top: 5px;
+    cursor: default;
+}
+
+.sysInfoMsg {
+    display: block;
+    background-color: transparent;
+    font-size: 14px;
+    color: #2d2d2d;
+    text-align: left;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    text-align-last: left;
+    letter-spacing: 0;
+    line-height: 24px;
+}
+
+.inlineError
+{
+  color: #cc0000;
+  font-size: 10pt;
+  padding-left: 3px;
+  text-align: center;
+}
+
+.inlineError2
+{
+  color: #cc0000;
+  font-size: 10pt;
+  display: block;
+  height: 20px;
+}
+
+#registerNoticeBlock
+{
+    position: absolute;
+    top: 700px;
+    text-align: left;
+    width: 90%;
+    padding-left: 10%
+}
+
+a:visited {
+  color: blue;
+}
+
+input[type="text"] {
+    font-family: AvenirNext LT Pro Regular;
+}
+
+/*** END ***/
+html, body {
+    margin: 0;
+    border: none;
+    background-color: #f7f7f7;
+    font-family: AvenirNext LT Pro Regular;
+}

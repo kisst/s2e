@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script type="text/javascript" src="../js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../js/underscore-1.5.1.min.js"></script>
+<script type="text/javascript" src="../js/backbone-1.0.0.min.js"></script>
+<script type="text/javascript" src="../js/fileLoad_v2.js"></script>
+<script>
+fileLoadMainFrame();
+
+var data;
+
+function add()
+{
+  if (checkValid())
+    dataSet(url('set_sysTsGlobalAdd.html'), formDataGet('setform'));
+}
+
+function del()
+{
+  dataSet(url('set_sysTsGlobalDel.html'), formDataGet('setform'));
+}
+
+function checkValid()
+{
+  DisableTopButton('Delete');
+  DisableTopButton('Add');
+  var name = $('#name').val();
+
+  if (name.length == 0)
+    return false;
+
+  if (name.length > 31)
+  {
+    alert(lang('err', 'errTimeScheduleNameErr'));
+    return false;
+  }
+
+  if (!validNormalString('name', lang('time','txtTsName')))
+    return false;
+
+  EnableTopButton('Add');
+  return true;
+}
+
+function init()
+{
+  fileLoadWait();
+
+var mainView = Backbone.View.extend({
+  el: '#main_container',
+  template: _.template($('#main_content').html()),
+  initialize: function() {
+    ContentLoading();
+    this.render();
+  },
+  render: function() {
+    var that = this;
+    dataGet(url('get_sysTsGlobal.html')).fetch({
+      success: function(model, resp){
+        logoutCheck(resp);
+        data = resp.data;
+        that.$el.html( that.template(resp));
+        tblDataAry = data.tss;
+        PagePostInit();
+      }
+    });
+  },
+  events: {
+    'click [name=selEntry]' : 'selectEntry',
+    'click [name=selAll]' : 'selectEntry'
+  },
+  selectEntry:function() {
+    selectCnt = 0;
+    _.each(data.tss, function(ts, idx)
+    {
+      var isSelect = $('#selEntry_'+ts.name).is(':checked');
+      if (isSelect)
+        selectCnt++;
+    })
+
+    if (selectCnt == 0)
+    {
+      $('#name').val("");
+      DisableTopButton('Add');
+      DisableTopButton('Delete');
+      EnableInputText("name");
+    }
+    else
+    {
+      if (selectCnt != 1)
+        $('#name').val("");
+      DisableTopButton('Add');
+      EnableTopButton('Delete');
+      DisableInputText("name");
+    }
+  }
+});
+
+mainFrame = new mainView();
+}
+</script>
+</head>
+
+<body onload="init();">
+<div id="main_container"></div>
+<script id="main_content" type="text/template">
+<% TopButtons([DeleteButton('del'), AddButton('add')]) %>
+
+<div id="setform" >
+<%= BlockEntryTableTop(lang('time','txtTsName'), 'timerSchedName') %>
+<table class="dataTable entry">
+<thead>
+<tr>
+  <td><%= TableCheckboxAll() %></td>
+  <td><%= lang('time','txtTsName') %></td>
+  <td><%= lang('time','txtTsStatus') %></td>
+  <td><%= lang('common','txtID') %></td>
+</tr>
+<tr>
+  <td></td>
+  <td><%= InputText('name', "") %></td>
+  <td></td>
+  <td></td>
+</tr>
+</thead>
+<tbody>
+  <% _.each(data.tss, function(ts, idx) { %>
+  <tr>
+    <td><%= TableCheckbox(ts.name) %></td>
+    <td><%= ts.name %></td>
+    <td><%= lang('common', ts.status ? 'txtActive' : 'txtInactive') %></td>
+    <td><%= ts.id %></td>
+  </tr>
+  <% }) %>
+</tbody>
+</table>
+<%= BlockEntryTableBot() %>
+</div>
+</script>
+
+</body>
+
+</html>
+

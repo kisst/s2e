@@ -1,0 +1,719 @@
+/** initial setup **/
+.lldpNeigh
+{
+  position: relative;
+  overflow: hidden;
+}
+.lldpNeigh .frame
+{
+  position: absolute;
+  overflow: scroll;
+  overflow-x: hidden; 
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding-right: 10px;
+}
+.lldpNeigh .frame:focus
+{
+  outline: thin dotted;
+}
+.lldpNeigh .frame::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+.lldpNeigh_has-scrollbar .frame::-webkit-scrollbar
+{
+  visibility: visible;
+}
+.lldpNeigh > .pane
+{
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  width: 8px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+.lldpNeigh > .pane > .slider
+{
+  position: relative;
+  margin: 0 1px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.lldpNeigh:hover > .pane, .pane.active, .pane.flashed
+{
+  visibility: visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity: 0.99;
+}
+
+.lldp
+{
+  position: relative;
+  overflow: hidden;
+}
+.lldp .frame
+{
+  position: absolute;
+  overflow: scroll;
+  overflow-x: hidden; 
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding-right: 10px;
+}
+.lldp .frame:focus
+{
+  outline: thin dotted;
+}
+.lldp .frame::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+.lldp_has-scrollbar .frame::-webkit-scrollbar
+{
+  visibility: visible;
+}
+.lldp > .pane
+{
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  width: 8px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+.lldp > .pane > .slider
+{
+  position: relative;
+  margin: 0 1px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.lldp:hover > .pane, .pane.active, .pane.flashed
+{
+  visibility: visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity: 0.99;
+}
+
+.alertScroll
+{
+  position: relative;
+  overflow: hidden;
+}
+.alertScroll .alertFrame
+{
+  position: absolute;
+  overflow: scroll;
+  overflow-x: hidden; 
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding-right: 10px;
+}
+.alertScroll .alertFrame:focus
+{
+  outline: thin dotted;
+}
+.alertScroll .alertFrame::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+.alertScroll_has-scrollbar .alertFrame::-webkit-scrollbar
+{
+  visibility: visible;
+}
+.alertScroll > .pane
+{
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  width: 8px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+.alertScroll > .pane > .slider
+{
+  position: relative;
+  margin: 0 1px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.alertScroll:hover > .pane, .pane.active, .pane.flashed
+{
+  visibility: visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity: 0.99;
+}
+
+.alertScroll
+{
+  height: 100px;
+}
+.alertScroll .slider
+{
+  background: #e7e5e4;
+}
+
+
+.aclScroll
+{
+  max-width: 1111px;
+  position: relative;
+  overflow: hidden;
+}
+
+.aclContent
+{
+/*  width: 745px;*/
+}
+
+.aclScroll .aclContent
+{
+  overflow: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.aclScroll .aclContent:focus
+{
+  outline: thin dotted;
+}
+.aclScroll .aclContent::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+.has-scrollbar .aclContent::-webkit-scrollbar
+{
+  visibility: visible;
+}
+
+.aclScroll > .pane-x {
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  right: 0;
+  bottom: 0;
+  height : 10px;
+  left : 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.aclScroll > .pane-x > .slider-x {
+  height: 8px;
+  position: relative;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.aclScroll .slider
+{
+  background: #e7e5e4;
+  margin-top: 1px;
+  margin-left: 1px;
+}
+.aclScroll:hover > .pane-x, .pane-x.active, .pane-x.flashed {
+  visibility : visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity : 0.99;
+}
+.bottomFixedHScroll
+{
+  max-width: 100%;
+  position: relative;
+  overflow: hidden;
+  margin-left: 8px;
+}
+
+.bottomFixedHContent
+{
+}
+
+.bottomFixedHScroll .bottomFixedHContent
+{
+  overflow: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.bottomFixedHScroll .bottomFixedHContent:focus
+{
+  outline: thin dotted;
+}
+.bottomFixedHScroll .bottomFixedHContent::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+.has-scrollbar .bottomFixedHContent::-webkit-scrollbar
+{
+  visibility: visible;
+}
+
+.bottomFixedHScroll > .pane-x {
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  right: 0;
+  bottom: 0;
+  height : 10px;
+  left : 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.bottomFixedHScroll > .pane-x > .slider-x {
+  height: 8px;
+  position: relative;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.bottomFixedHScroll .slider
+{
+  background: #e7e5e4;
+  margin-top: 1px;
+  margin-left: 1px;
+}
+.bottomFixedHScroll:hover > .pane-x, .pane-x.active, .pane-x.flashed {
+  visibility : visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity : 0.99;
+}
+
+.tmp
+{
+  position: relative;
+  overflow: hidden;
+}
+.tmp .frame
+{
+  position: absolute;
+/*  overflow: scroll; */
+  overflow-x: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.tmp .frame:focus
+{
+  outline: thin dotted;
+}
+.tmp .frame::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+.has-scrollbar .frame::-webkit-scrollbar
+{
+  visibility: visible;
+}
+.tmp > .pane
+{
+  /* background: rgba(0,0,0,.25); */
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  width: 8px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+.tmp > .pane > .slider
+{
+  /* background: #444; */ /* background: rgba(0,0,0,.5); */
+  position: relative;
+  margin: 0 1px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.tmp:hover > .pane, .pane.active, .pane.flashed
+{
+  visibility: visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity: 0.99;
+}
+
+.contentNav
+{
+  position: relative;
+  overflow: hidden;
+}
+.contentNav .contentFrame
+{
+  position: absolute;
+/*  overflow: scroll; */
+  overflow-x: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.contentNav .contentFrame:focus
+{
+  outline: thin dotted;
+}
+.contentNav .contentFrame::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+.has-scrollbar .contentFrame::-webkit-scrollbar
+{
+  visibility: visible;
+}
+.contentNav > .pane
+{
+  /* background: rgba(0,0,0,.25); */
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  width: 10px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+.contentNav > .pane > .slider
+{
+  /* background: #444; */ /* background: rgba(0,0,0,.5); */
+  position: relative;
+  margin: 0 1px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.contentNav:hover > .pane, .pane.active, .pane.flashed
+{
+  visibility: visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity: 0.99;
+}
+
+/** customizing style */
+.tmp
+{
+  /*background: #bba;*/
+  width:178px;
+/*  min-height: 576px; */
+  border-top: 0px;
+}
+.tmp .slider
+{
+  background: #e7e5e4;
+}
+
+.lldp
+{
+  height: 340px;
+}
+.lldp .slider
+{
+  background: #e7e5e4;
+}
+
+.lldpNeigh
+{
+  height: 340px;
+}
+.lldpNeigh .slider
+{
+  background: #e7e5e4;
+}
+
+.contentNav .slider
+{
+  background: #e7e5e4;
+}
+
+.horizScroll
+{
+  max-width: 1111px;
+  position: relative;
+  overflow: hidden;
+  margin-left: 8px;
+}
+
+.horizScrollEmWEB
+{
+/*  width: 745px; */
+}
+
+.horizContent
+{
+/*  width: 745px;*/
+}
+
+.horizScroll .horizContent
+{
+/*  position: absolute;*/
+/*  overflow: scroll; */
+  overflow: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.horizScroll .horizContent:focus
+{
+  outline: thin dotted;
+}
+.horizScroll .horizContent::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+.has-scrollbar .horizContent::-webkit-scrollbar
+{
+  visibility: visible;
+}
+
+.horizScroll > .pane-x {
+  /*background : rgba(0,0,0,.25);
+  position : absolute;
+  visibility : hidden\9; Target only IE7 and IE8 with this hack
+  opacity : .01;
+  bottom : 0;
+  right : 0;
+  -webkit-transition : .2s;
+  -moz-transition : .2s;
+  -o-transition : .2s;
+  transition : .2s;
+  -moz-border-radius : 5px;
+  -webkit-border-radius : 5px;
+  border-radius : 5px;*/
+  
+  /* background: rgba(0,0,0,.25); */
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  /*width: 10px;*/
+  right: 0;
+  /*top: 0;*/
+  bottom: 0;
+  height : 10px;
+  left : 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.horizScroll > .pane-x > .slider-x {
+  /*background: #444;
+  background: rgba(0,0,0,.5);
+  position : relative;
+  margin : 0 1px;
+  -moz-border-radius : 3px;
+  -webkit-border-radius : 3px;
+  border-radius : 3px;*/
+  height: 8px;
+  position: relative;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.horizScroll .slider
+{
+  background: #e7e5e4;
+  margin-top: 1px;
+  margin-left: 1px;
+}
+.horizScroll:hover > .pane-x, .pane-x.active, .pane-x.flashed {
+  visibility : visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity : 0.99;
+}
+
+.contentHelp
+{
+  position: relative;
+  overflow: hidden;
+  height: 310px;
+}
+.contentHelp .contentHelpFrame
+{
+  position: absolute;
+/*  overflow: scroll; */
+  overflow-x: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.contentHelp .contentHelpFrame:focus
+{
+  outline: thin dotted;
+}
+.contentHelp .contentHelpFrame::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+.has-scrollbar .contentHelpFrame::-webkit-scrollbar
+{
+  visibility: visible;
+}
+.contentHelp > .pane
+{
+  /* background: rgba(0,0,0,.25); */
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  width: 10px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+.contentHelp > .pane > .slider
+{
+  /* background: #444; */ /* background: rgba(0,0,0,.5); */
+  position: relative;
+  margin: 0 1px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.contentHelp:hover > .pane, .pane.active, .pane.flashed
+{
+  visibility: visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity: 0.99;
+}
+
+.contentHelp .slider
+{
+  background: #e7e5e4;
+}
+
+.contentRegStat
+{
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+}
+.contentRegStat .contentHelpFrame
+{
+  position: absolute;
+/*  overflow: scroll; */
+  overflow-x: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.contentRegStat .contentHelpFrame:focus
+{
+  outline: thin dotted;
+}
+.contentRegStat .contentHelpFrame::-webkit-scrollbar
+{
+  visibility: hidden;
+}
+
+.contentRegStat > .pane
+{
+  /* background: rgba(0,0,0,.25); */
+  position: absolute;
+  border: 1px solid #e7e5e4;
+  width: 10px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  visibility: hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity: .01;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -o-transition: .2s;
+  transition: .2s;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+.contentRegStat > .pane > .slider
+{
+  /* background: #444; */ /* background: rgba(0,0,0,.5); */
+  position: relative;
+  margin: 0 1px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.contentRegStat:hover > .pane, .pane.active, .pane.flashed
+{
+  visibility: visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity: 0.99;
+}
+
+.contentRegStat .slider
+{
+  background: #e7e5e4;
+}

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script type="text/javascript" src="../js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../js/underscore-1.5.1.min.js"></script>
+<script type="text/javascript" src="../js/backbone-1.0.0.min.js"></script>
+<script type="text/javascript" src="../js/fileLoad_v2.js"></script>
+<script>
+fileLoadMainFrame();
+
+var data;
+var _logout = false;
+
+function update()
+{
+  mainFrame.render();
+}
+
+function delay(sec) {
+  var start = new Date().getTime();
+  while (new Date().getTime() < start + delay);
+}
+
+function validCheck()
+{
+  if (!validNormalString('sysName', lang('sys','txtSysName'), true))
+    return false;
+
+  return true;
+}
+
+function applySet() {
+  if (!IsUndefOrNull(data.cloudApp) && data.cloudApp)
+  {
+    dataSet(url('set_sysMgmtInfo.html'), formDataGet('setform'));
+  }
+  else
+  {
+    if (validCheck())
+      dataSet(url('set_sysMgmtInfo.html'), formDataGet('setform'));
+  }
+}
+
+function loginRedirect()
+{
+  _top.location.href = '../login.html';
+}
+
+function applyFirstTimeToCloud() {
+  dataSet(url('set_sysFirstTimeEnableCloud.html'), formDataGet('setform'));
+  _top.stopMonitor = true;
+  setTimeout(function () { loginRedirect(); }, 100000);
+  alert(lang('alert','alertCloudFirstReboot'));
+}
+
+function apply()
+{
+  if(!IsUndefOrNull(data.cloudApp))
+  {
+    if(1 == GetRadioVal('cloudApp') && 0 == data.cloudApp)
+    {
+      if (1 == data.isFirstTimeToCloud)
+      {
+    	  applyFirstTimeToCloud();
+      }
+      else
+      {
+        _top.alertCb = applySet;
+        _logout = true;
+        alert(lang('alert','alertCloudRedirect'));
+      }
+      return;
+    }
+    else if(0 == GetRadioVal('cloudApp') && 1 == data.cloudApp)
+    {
+      _top.alertCb = applySet;
+      _logout = true;
+      alert(lang('alert','alertCloudRedirect'));
+
+      return;
+    }
+  }
+
+  applySet();
+}
+
+function SSORegister() {
+    var redirect_home_after_login = window.location.origin + "/cgi/setup.cgi";
+    var redirect = 'https://'+_top.ssoUrl+'/login?redirectUrl='+redirect_home_after_login+'&devtypeid='+data.txtVerModelName+'&serial_num='+data.sysSN+'&sessionID='+_top.ssoSessionId;
+    top.location.href = redirect;
+}
+
+function TablesDecorate()
+{
+  $("#deviceStatus").tableAutoDecorator().css("border-bottom", "1px solid #E7E5E4");
+  $("#fanStatus").tableAutoDecorator().css("border-bottom", "1px solid #E7E5E4");
+  $("#tempStatus").tableAutoDecorator().css("border-bottom", "1px solid #E7E5E4");
+  $("#versions").tableAutoDecorator().css("border-bottom", "1px solid #E7E5E4");
+  $("#chassisFans").css("border-bottom", "1px solid #E7E5E4");
+  $("#chassisTemp").css("border-bottom", "1px solid #E7E5E4");
+  $(".tableStyle tr:last-child td").css("border-bottom", "0 none");
+  $("#powerSupp").css("border-bottom", "1px solid #E7E5E4");
+}
+
+function showAlertDiv()
+{
+  if (top.$("#AlertDialog").length == 0)
+  {
+    top.$('.mainPageBody').append("<div id='AlertDialog' title='Alert' class='alert' style='display: none;'><div class='separator10' style='border-top: 1px solid #e5e4e3;'></div><div class='cloudAlertMsgHeight'><div class='cloudAlertContent'><label class='defaultFont' id='AlertDialogShortDescription'>Alert Short Description</label></div></div><div class='separator20'></div>  <a onClick='top.deleteAlertDiv();' aid='AlertMsgButton_1' href='javascript:void(0)' class='msgButton'><img src='images/Ok_on.html'/></a><span class='defaultFont' style='float: right; padding-right: 2em;'><form id='hideAlert'><input type='checkbox' id='hideAlertName' name='hidePopupName'>" + lang('sso', 'txtSsoDontShowMessageAgain') + "</span></form></div>");
+    top.$('.mainPageBody').find('.alertFrame ').css("right", "-16px");
+  }
+}
+
+function deleteAlertDivLocal()
+{
+    var checkObj = top.$("#hideAlertName");
+    if (checkObj.prop("checked") === true)
+    {
+        dataSet(url('set_hidePopupMsg.html'), top.formDataGet("hideAlert"), null, null, true);
+        
+        /* Refresh data */
+        top.hidePopupName += "," + checkObj.val();
+    }
+  
+  top.$('.ui-dialog').remove();
+  top.$('#AlertDialog').remove();
+}
+
+function showAlertMessage(message, options)
+{
+    /* Don't show message if options.name is defined in hidePopupName */
+    if (!IsUndefOrNull(top.hidePopupName) && top.hidePopupName.indexOf(options.name) >= 0)
+        return;
+    
+  showAlertDiv();
+  var $AlertDialog = top.$("#AlertDialog");
+      $AlertDialog.find("#AlertDialogShortDescription").html(message);
+      $AlertDialog.dialog( {
+        autoOpen: true,
+        height: options.height,
+        width: 650,
+        resizable: false,
+        modal: true,
+      });
+  var $obj = top.$('.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only.ui-dialog-titlebar-close').parent();
+  $obj.html( $obj.html().replace("button ","button onClick='top.deleteAlertDiv();' "));
+  top.deleteAlertDiv = deleteAlertDivLocal;
+  top.$("#hideAlertName").val(options.name);
+}
+
+function addNoticeDiv()
+{
+  if (top.$("#NoticeDialog").length == 0)
+  {
+    top.$('.mainPageBody').append("<div id='NoticeDialog' title='Notice' class='alert' style='display: none;'><div class='separator10' style='border-top: 1px solid #e5e4e3;'></div><div class='cloudAlertMsgHeight'><div class='cloudAlertContent'><div id='sideNavMenu'><div class='alertFrame' name='alertFrame'><label class='defaultFont' id='NoticeDialogShortDescription'>Alert Short Description</label><div class='separator20'></div><label class='defaultFont' id='NoticeDialogFullDescription'>Alert Full Description</label></div> </div></div></div><div class='separator20'></div> <a onClick='top.deleteNoticeDiv();' aid='AlertMsgButton_1' href='javascript:void(0)' class='msgButton'><img src='images/Ok_on.html'/></a><span class='defaultFont' style='float: right; padding-right: 2em;'><form id='hideNotice'><input type='checkbox' id='hideNoticeName' name='hidePopupName'>" + lang('sso', 'txtSsoDontShowMessageAgain') + "</form></span></div>");
+    top.$('.mainPageBody').find('.alertFrame ').css("right", "-16px");
+  }
+}
+
+function deleteNoticeDiv()
+{
+    var checkObj = top.$("#hideNoticeName");
+    if (checkObj.prop("checked") === true)
+    {
+        dataSet(url('set_hidePopupMsg.html'), top.formDataGet("hideNotice"), null, null, true);
+        
+        /* Refresh data */
+        top.hidePopupName += "," + checkObj.val();
+    }
+    
+    top.$('.ui-dialog').remove();
+    top.$('#NoticeDialog').remove();
+}
+
+function showNotice(msg, options)
+{
+    if (IsUndefOrNull(data.cloudApp))
+      return;
+    
+    /* Don't show message if options.name is defined in hidePopupName */
+    if (!IsUndefOrNull(top.hidePopupName) && top.hidePopupName.indexOf(options.name) >= 0)
+        return;
+
+    addNoticeDiv();
+    var $NoticeDialog = top.$("#NoticeDialog");
+        $NoticeDialog.find("#NoticeDialogShortDescription").html(msg);
+        $NoticeDialog.find("#NoticeDialogFullDescription").text("");
+        $NoticeDialog.dialog( {
+          autoOpen: true,
+          //height: options.height,
+          width: 700,
+          resizable: false,
+          modal: true,
+        });
+    var $obj = top.$('.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only.ui-dialog-titlebar-close').parent();
+    $obj.html( $obj.html().replace("button ","button onClick='top.deleteNoticeDiv();' "));
+    top.deleteNoticeDiv = deleteNoticeDiv;
+    top.$("#hideNoticeName").val(options.name);
+}
+
+function firstTimeSwitchToCloud()
+{
+    var checkObj = top.$("#hideConfirmName");
+    if (checkObj.prop("checked") === true)
+    {
+        dataSet(url('set_hidePopupMsg.html'), top.formDataGet("hideConfirm"), null, null, true);
+
+        /* Refresh data */
+        top.hidePopupName += "," + checkObj.val();
+    }
+}
+
+function CancelSwitchToCloud()
+{
+	$("#cloudApp_0").prop("checked",true);
+    var checkObj = top.$("#hideConfirmName");
+    if (checkObj.prop("checked") === true)
+    {
+        dataSet(url('set_hidePopupMsg.html'), top.formDataGet("hideConfirm"), null, null, true);
+
+        /* Refresh data */
+        top.hidePopupName += "," + checkObj.val();
+    }
+}
+
+function init()
+{
+  fileLoadWait();
+
+var mainView = Backbone.View.extend({
+  el: '#main_container',
+  template: _.template($('#main_content').html()),
+  initialize: function() {
+    ContentLoading();
+    this.render();
+  },
+  render: function() {
+    var that = this;
+    dataGet(url('get_sysMgmtInfo.html')).fetch({
+      success: function(model, resp){
+        logoutCheck(resp);
+
+        if (_logout)
+          _top.logout();
+
+        data = resp.data;
+        that.$el.html( that.template(resp));
+
+        PagePostInit();
+        TablesDecorate();
+
+        $('#sysName').val(data.sysName);
+        $('#sysLocation').val(data.sysLocation);
+        $('#sysContact').val(data.sysContact);
+
+        var sn = data.sysSN;
+        var webURL = "https://my.netgear.com/Registration/deviceping.aspx?callback=?&amp;serial=";
+        webURL += sn;
+
+        if (0 == data.regStatus && 0 == data.state && !hasProdCfg('hasSSO'))
+        {
+          dataGet(webURL).fetch({
+            success: function(model, resp){
+              regData = resp.PingResult;
+            }
+          });
+
+          window.addEventListener('error', function(e) {
+              var ie = window.event || {};
+              var errMsg = e.message || ie.errorMessage || "404 error on " + window.location;
+              var errSrc = (e.filename || ie.errorUrl) + ': ' + (e.lineno || ie.errorLine);
+              alert(lang('err','errRegCommErr'));
+          }, true);
+        }
+        //throw new Error("Here is my error!");
+
+        if (!IsUndefOrNull(data.cloudApp) && !data.cloudApp && !_top.noticeShow)
+        {
+          var msg = "";
+          msg += lang('alert','alertCloudNotice');
+
+          if (data.isFirstTime === 1)
+              msg += "<br/><br/>" + lang('alert', 'alertCloudConnectInternet');
+
+          showNotice(msg, {"name" : "lanOnly"});
+          _top.noticeShow = true;
+        }
+        else if (!IsUndefOrNull(data.cloudApp) && data.cloudApp && !_top.noticeShow)
+        {
+          var msg = "";
+          msg += lang('alert','alertCloudNotice1') + "<br/><br/>";
+          msg += lang('alert','alertCloudNotice2') + "<br/><br/>";
+          msg += lang('alert','alertCloudPc2');
+          msg += "<a href='https://www.netgear.com/support/product/Insight.aspx#docs' target='_blank'>" + lang('alert','alertCloudPc3') + "</a>.";
+          showNotice(msg, {"name" : "cloudMgmt"});
+          _top.noticeShow = true;
+        }
+      }
+    });
+  },
+  events: {
+    'click [name=cloudApp]':'updateCloudAgent',
+  },
+  updateCloudAgent:function(e){
+    var msg = "";
+    if(1 == GetRadioVal('cloudApp') && 0 == data.cloudApp)
+    {
+        if (1 == data.isFirstTimeToCloud)
+    	{
+            msg += "<b>" + lang('alert', 'alertCouldFirstAppWarning') + ":</b><br/><br/>";
+            msg += lang('alert','alertCouldFirstApp1') + "<br/><br/>";
+            msg += lang('alert','alertCouldFirstApp2') + "<br/><br/>";
+            msg += lang('alert','alertCouldFirstApp3') + "<a href='https://insight.netgear.com/' target='_blank'>https://insight.netgear.com</a>.<br/><br/>";
+            msg += lang('alert','alertCouldFirstApp4') + "<a href='https://www.netgear.com/support/product/Insight.aspx#docs' target='_blank'>" + lang('alert','alertCloudPc3') + "</a>.<br/><br/>";
+            ConfirmCustom("firstTimeSwitchToCloud", "CancelSwitchToCloud", 700, 400, msg, {"hideName" : "firstTimeToCloudMgmt"});
+    	}
+        else
+        {
+            msg += lang('alert','alertCloudApp1') + "<br/><br/>";
+            msg += lang('alert','alertCloudApp2') + "<a href='https://www.netgear.com/support/product/Insight.aspx#docs' target='_blank'>" + lang('alert','alertCloudApp3') + "</a>.<br/><br/>";
+            msg += lang('alert','alertCloudApp4');
+            showAlertMessage(msg, {"height" : 212, "name" : "toCloudMgmt"});
+        }
+    }
+    else if(0 == GetRadioVal('cloudApp') && 1 == data.cloudApp)
+    {
+      msg += lang('alert','alertCloudPc1') + "<br/><br/>";
+      msg += lang('alert','alertCloudPc2') + "<a href='https://www.netgear.com/support/product/Insight.aspx#docs' target='_blank'>" + lang('alert','alertCloudPc3') + "</a>.<br/><br/>";
+      msg += lang('alert','alertCloudPc4') + "<br/><br/>";
+      msg += lang('alert','alertCloudPc5');
+      showAlertMessage(msg, {"height" : 380, "name" : "toLanOnly"});
+    }
+  }
+});
+
+mainFrame = new mainView();
+}
+</script>
+</head>
+
+<body onload="init();" class="margin0px">
+<div id="main_container"></div>
+<script id="main_content" type="text/template">
+<% if (_top.ssoHasInternet === false || _top.ssoRegistered === true) { %>
+<% TopButtons([RefreshButton('update'),ApplyButton('apply'), CancelButton()]) %>
+<% } else { %>
+<% TopButtons([RefreshButton('update'),ApplyButton('apply'), CancelButton(), RegisterButton('SSORegister')]) %>
+<% } %>
+
+<div id="setform" >
+<div class="mainBody mainContainer">
+<table>
+<% if (!IsUndefOrNull(data.cloudDflt) && data.cloudDflt) { %>
+<tr class="detailsAreaContainer">
+  <td>
+    <%= BlockTwoColTop(lang('sys','titMgmtMode'),'cloudConfig') %>
+    <table>
+    <tr>
+      <td style="vertical-align: top;line-height:20px;"><input type="radio" name="cloudApp" id="cloudApp_1" value="1" <%= (data.cloudApp)?'checked':'' %>></td>
+      <td style="vertical-align: top;line-height:20px;padding-left:5px;">
+        NETGEAR Insight Mobile App<br>and Insight Cloud Portal<br>(Cloud/Remote)
+      </td>
+      <td width="80"></td>
+      <td style="vertical-align: top;line-height:20px;"><input type="radio" name="cloudApp" id="cloudApp_0" value="0" <%= (!data.cloudApp)?'checked':'' %>></td>
+      <td style="vertical-align: top;line-height:20px;padding-left:5px;">
+        Direct Connect Web-browser<br>Interface (Local LAN Only)
+      </td>
+    </tr>
+    </table>
+    <%= BlockTwoColBot() %>
+  </td>
+</tr>
+<% } else if (!IsUndefOrNull(data.cloudDflt) && !data.cloudDflt) { %>
+<tr class="detailsAreaContainer">
+  <td>
+    <%= BlockTwoColTop(lang('sys','titMgmtMode'),'cloudConfig') %>
+    <table>
+    <tr>
+      <td><input type="radio" name="cloudApp" id="cloudApp_0" value="0" <%= (!data.cloudApp)?'checked':'' %>></td>
+      <th><label for="cloudApp_0" name="cloudApp_label" id="cloudApp_0_label"><%= lang('sys','txtPCWeb') %></label></td>
+      <td width="60"></td>
+      <td><input type="radio" name="cloudApp" id="cloudApp_1" value="1" <%= (data.cloudApp)?'checked':'' %>></td>
+      <th><label for="cloudApp_1" name="cloudApp_label" id="cloudApp_1_label"><%= lang('sys','txtInsightAPP') %></label></td>
+    </tr>
+    <tr>
+      <td></td>
+      <th><%= lang('sys','txtLocalLan') %></th>
+      <td></td>
+      <td></td>
+      <th><%= lang('sys','txtCloudRemote') %></th>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <th><%= lang('sys','txtInsightSubscript') %></th>
+    </tr>
+    </table>
+    <%= BlockTwoColBot() %>
+  </td>
+</tr>
+<% } %>
+<% if (!IsUndefOrNull(data.apps)) { %>
+<tr class="detailsAreaContainer">
+<%= BlockEntryTableTop(lang('sys','titCloudAppInfo'), 'cloudStatus') %>
+<table class="dataTable status" style="width:414px;">
+<thead>
+<tr>
+  <td><%= lang('sys','txtAppName') %></td>
+  <td><%= lang('sys','txtAppStatus') %></td>
+  <td><%= lang('sys','txtAppVersion') %></td>
+</tr>
+</thead>
+<tbody>
+  <% if (!IsUndefOrNull(data.apps)) { %>
+  <% _.each(data.apps, function(app, idx) { %>
+  <tr>
+    <td><%= app.name %></td>
+    <td><%= show(app.status) %></td>
+    <td><%= app.version %></td>
+  </tr>
+  <% })} %>
+</tbody>
+</table>
+<%= BlockEntryTableBot() %>
+</tr>
+<% } %>
+
+<tr class="detailsAreaContainer">
+  <td>
+    <%= BlockTwoColTop(lang('sys','titSysInfo'),'systemInformation') %>
+    <table>
+    <tr>
+      <th><%= lang('sys','txtProdName') %></th>
+      <td><%= show(data.sysProduct) %></td>
+    </tr>
+    <tr>
+      <th><%= lang('sys','txtSysName') %></th>
+      <td>
+        <% if (!IsUndefOrNull(data.cloudApp) && data.cloudApp) { %>
+        <%= data.sysName %>
+        <% } else  { %>
+        <%= InputText("sysName", data.sysName, 255, 32) %>
+        <% } %>
+      </td>
+    </tr>
+    <tr>
+      <th><%= lang('sys','txtSysLoc') %></th>
+      <td>
+        <% if (!IsUndefOrNull(data.cloudApp) && data.cloudApp) { %>
+        <%= data.sysLocation %>
+        <% } else  { %>
+        <%= InputText("sysLocation", data.sysLocation, 255, 32) %>
+        <% } %>
+      </td>
+    </tr>
+    <tr>
+      <th><%= lang('sys','txtSysContact') %></th>
+      <td>
+        <% if (!IsUndefOrNull(data.cloudApp) && data.cloudApp) { %>
+        <%= data.sysContact %>
+        <% } else  { %>
+        <%= InputText("sysContact", data.sysContact, 255, 32) %>
+        <% } %>
+      </td>
+    </tr>
+    <tr>
+      <th><%= lang('sys','txtSn') %></th>
+      <td><%= data.sysSN %></td>
+    </tr>
+    <tr>
+      <th><%= lang('sys','txtSysOID') %></th>
+      <td><%= data.sysObjectOid %></td>
+    </tr>
+    <tr>
+      <th><%= lang('sys','txtDateTime') %></th>
+      <td><%= data.sysDateTime %></td>
+    </tr>
+    <tr>
+      <th><%= lang('sys','txtUpTime') %></th>
+      <td><%= data.sysUpTimeDays + " " + lang('sys', 'txtUpTimeDays')
+            + " " + data.sysUpTimeHours + " " + lang('sys', 'txtUpTimeHours')
+            + " " + data.sysUpTimeMins + " " + lang('sys', 'txtUpTimeMins')
+            + " " + data.sysUpTimeSecs + " " + lang('sys', 'txtUpTimeSecs') %></td>
+    </tr>
+    <tr>
+      <th><%= lang('sys','txtBaseMac') %></th>
+      <td><%= data.macAddr %></td>
+    </tr>
+    </table>
+    <%= BlockTwoColBot() %>
+  </td>
+</tr>
+
+<% if (hasProdCfg('hasThermal') && !IsUndefOrNull(data.thermals)) { %>
+<tr class="detailsAreaContainer">
+<%= BlockEntryTableTop(lang('sys','titTempSensor'), 'thermal') %>
+<table class="dataTable status" style="width:450px;">
+<thead>
+<tr>
+  <td><%= lang('sys','txtSensor') %></td>
+  <td><%= lang('sys','txtDescriptor') %></td>
+  <td><%= lang('sys','txtTemp') %></td>
+  <td><%= lang('sys','txtState') %></td>
+  <td><%= lang('sys','txtMaxTemp') %></td>
+</tr>
+</thead>
+<tbody>
+  <% if (!IsUndefOrNull(data.thermals)) { %>
+  <% _.each(data.thermals, function(thermal, idx) { %>
+  <tr>
+    <td><%= thermal.sensor %></td>
+    <td><%= show(thermal.descp) %></td>
+    <td><%= thermal.temp %></td>
+    <td><%= show(thermal.state) %></td>
+    <td><%= thermal.maxTemp %></td>
+  </tr>
+  <% })} %>
+</tbody>
+</table>
+<%= BlockEntryTableBot() %>
+</tr>
+<% } %>
+
+<% if (!IsUndefOrNull(data.fans)) { %>
+<tr class="detailsAreaContainer">
+  <td class="spacerHeight21"></td>
+</tr>
+<tr class="detailsAreaContainer">
+  <td class="spacerHeight21"></td>
+</tr>
+<tr class="detailsAreaContainer">
+  <td>
+    <table class="tableStyle">
+    <tr>
+      <td colspan="3"><%= tbhdr(lang('sys','titFans'), 'chassisFans') %></td>
+    </tr>
+    <tr>
+      <td class="subSectionBodyDot">&nbsp;</td>
+      <td class="spacer100Percent paddingsubSectionBodyWide">
+        <table class="tableStyle" id='chassisFans'>
+        <tr class="white10Bold">
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtFan') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtDescriptor') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtType') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtSpeed') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtDutyLevel') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtState') %></td>
+        </tr>
+	    <% _.each(data.fans, function(fan, idx) { %>
+          <tr>
+            <TD class ="messageTableWhiteBorder defaultFont"><%= fan.txtFan %></TD>
+            <TD class ="messageTableWhiteBorder defaultFont"><%= show(fan.txtFanDescriptor) %></TD>
+            <TD class ="messageTableWhiteBorder defaultFont"><%= show(fan.txtFanType) %></TD>
+            <TD class ="messageTableWhiteBorder defaultFont"><%= fan.txtFanSpeed %></TD>
+            <TD class ="messageTableWhiteBorder defaultFont"><%= fan.txtDutyLevel %></TD>
+            <TD class ="messageTableWhiteBorder defaultFont subSectionBodyDotRight"><%= show(fan.txtFanState) %></TD>
+          </tr>
+	    <% }) %>
+        </table>
+      </td>
+      <td class="subSectionBodyDotRight">&nbsp;</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="subSectionBottom">&nbsp;</td>
+    </tr>
+    </table>
+  </td>
+</tr>
+<% } %>
+<% if (!IsUndefOrNull(data.powers)) { %>
+<tr class="detailsAreaContainer">
+  <td class="spacerHeight21"></td>
+</tr>
+<tr class="detailsAreaContainer">
+  <td>
+    <table class="tableStyle">
+    <tr>
+      <td colspan="3"><%= tbhdr(lang('sys','titPwrSupp'), 'powerSupplies') %></td>
+    </tr>
+    <tr>
+      <td class="subSectionBodyDot">&nbsp;</td>
+      <td class="spacer100Percent paddingsubSectionBodyWide">
+        <table class="tableStyle" id='powerSupp'>
+        <tr class="white10Bold">
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtPowerSup') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtDescriptor') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtType') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder spacer10Percent"><%= lang('sys','txtState') %></td>
+        </tr>
+	    <% _.each(data.powers, function(power, idx) { %>
+	        <tr>
+	          <TD class ="messageTableWhiteBorder defaultFont"><%= power.txtPowerSupply %></TD>
+	          <TD class ="messageTableWhiteBorder defaultFont"><%= power.txtPowerDescriptor %></TD>
+	          <TD class ="messageTableWhiteBorder defaultFont"><%= show(power.txtPowerType) %></TD>
+	          <TD class ="messageTableWhiteBorder defaultFont subSectionBodyDotRight"><%= show(power.txtPowerState) %></TD>
+	        </tr>
+	    <% }) %>
+        </table>
+      </td>
+      <td class="subSectionBodyDotRight">&nbsp;</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="subSectionBottom">&nbsp;</td>
+    </tr>
+    </table>
+  </td>
+</tr>
+<% } %>
+<tr class="detailsAreaContainer">
+  <td class="spacerHeight21"></td>
+</tr>
+<tr class="detailsAreaContainer">
+  <td>
+    <table class="tableStyle" id="version_status">
+    <tr>
+      <td colspan="3"><%= tbhdr(lang('sys','txtVer'),'versions') %></td>
+    </tr>
+    <tr>
+      <td class="subSectionBodyDot"></td>
+      <td class="spacer100Percent paddingsubSectionBodyWide">
+        <table class="tableStyle tableBodyStyle"  id='versions'>
+        <tr class="white10Bold">
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder fontTableTitle paddingTableHeader spacer15Percent"><%= lang('sys','txtModelName') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder fontTableTitle paddingTableHeader spacer15Percent"><%= lang('sys','txtBootVer') %></td>
+          <td class="messageTableHeaderBorder messageTableHeaderVerticalBorder fontTableTitle paddingTableHeader spacer15Percent"><%= lang('sys','txtSwVer') %></td>
+        </tr>
+        <tr>
+          <td class="messageTableWhiteBorder defaultFont"><%= data.txtVerModelName %></td>
+          <td class="messageTableWhiteBorder defaultFont"><%= data.txtBootVer %></td>
+          <td class="messageTableWhiteBorder defaultFont"><%= data.txtSwVer %></td>
+        </tr>
+        </table>
+      </td>
+      <td class="subSectionBodyDotRight"></td>
+    </tr>
+    <tr>
+      <td colspan="3" class="subSectionBottom">&nbsp;</td>
+    </tr>
+    </table>
+  </td>
+</tr>
+</table>
+</div>
+</div>
+</script>
+
+</body>
+
+</html>

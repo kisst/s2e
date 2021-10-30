@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script type="text/javascript" src="../js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../js/underscore-1.5.1.min.js"></script>
+<script type="text/javascript" src="../js/backbone-1.0.0.min.js"></script>
+<script type="text/javascript" src="../js/fileLoad_v2.js"></script>
+<script>
+fileLoadMainFrame();
+
+var data;
+var selEntries_pm = null;
+var selEntries_State = null;
+
+function validCheck()
+{
+  var valid = true;
+
+  if ($('#threshold').val().length)
+    valid &= validRange('threshold', data.threshold_min, data.threshold_max, lang('poe', 'txtPowerThreshold'));
+
+  return valid;
+}
+
+function apply()
+{
+  if (validCheck())
+    dataSet(url('set_sysPoEConf.html'), formDataGet('setform'));
+}
+
+function cancel()
+{
+  var resp = {};
+  var data = _top.window.frames['maincontent'].data;
+  var frameContent = _top.window.frames['maincontent'].mainFrame;
+
+  resp["data"] = data;
+  frameContent.$el.html( frameContent.template(resp));
+  _top.window.frames['maincontent'].PagePostInit();
+  _top.window.frames['maincontent'].UpdateTopButtons();
+  DisableAllTopButtons();
+}
+
+function TablesDecorate()
+{
+  $("#deviceStatus").tableAutoDecorator().css("border-bottom", "1px solid #E7E5E4");
+  $("#fanStatus").tableAutoDecorator().css("border-bottom", "1px solid #E7E5E4");
+  $("#tempStatus").tableAutoDecorator().css("border-bottom", "1px solid #E7E5E4");
+  $("#versions").tableAutoDecorator().css("border-bottom", "1px solid #E7E5E4");
+  $("#chassisFans").css("border-bottom", "1px solid #E7E5E4");
+  $("#chassisTemp").css("border-bottom", "1px solid #E7E5E4");
+  $(".tableStyle tr:last-child td").css("border-bottom", "0 none");
+  $("#powerSupp").css("border-bottom", "1px solid #E7E5E4");
+}
+
+function init()
+{
+  fileLoadWait();
+
+var mainView = Backbone.View.extend({
+  el: '#main_container',
+  template: _.template($('#main_content').html()),
+  initialize: function() {
+    ContentLoading();
+    selEntries_pm = [['', -1], [lang('poe', 'txtPMStatic'), 1], [lang('poe', 'txtPMDynamic'), 2]];
+    selEntries_State = [['',-1],[lang('common','txtEnable'),1],[lang('common','txtDisable'),0]];
+    this.render();
+  },
+  render: function() {
+    var that = this;
+    dataGet(url('get_sysPoEConf.html')).fetch({
+      success: function(model, resp){
+        logoutCheck(resp);
+        data = resp.data;
+        that.$el.html( that.template(resp));
+
+        tblDataAry = data.units;
+
+        PagePostInit();
+        TablesDecorate();
+
+        if (!IsUndefOrNull(data.adminPower) || !IsUndefOrNull(data.unintr)) {
+          currButtonsType = '';
+        }
+      }
+    });
+  },
+  events: {
+    'click [name=adminPower]':'chgAdaptPwr',
+  },
+  chgAdaptPwr:function(e){
+    var currPwr = GetRadioVal('adminPower');
+    if (currPwr > data.adminPower)
+    {
+      var currAdapt = 0;
+
+      for (i = 0; i < data.pwrBudgets.length; i++)
+      {
+        if (currPwr == data.pwrBudgets[i].poe)
+        {
+          currAdapt = (data.pwrBudgets[i].adapt/1000);
+          break;
+        }
+      }
+
+      alert(lang('alert','alertPoEAdaptChg', [currAdapt]));
+    }
+  }
+});
+
+mainFrame = new mainView();
+}
+</script>
+</head>
+
+<body onload="init();" class="margin0px">
+<div id="main_container"></div>
+<script id="main_content" type="text/template">
+<% TopButtons([RefreshButton(),ApplyButton('apply'), CancelButton('cancel')]) %>
+
+<div id="setform" >
+
+<% if (!IsUndefOrNull(data.adminPower)) { %>
+<table>
+<tr class="detailsAreaContainer">
+  <td>
+    <%= BlockTwoColTop(lang('poe','titPowerBudget'),'poeAdapter') %>
+    <table>
+    <tr>
+      <% _.each(data.pwrBudgets, function(budget, idx) { %>
+          <td><%= Radio('adminPower', budget.poe, (budget.adapt/1000)+"W ("+(budget.poe/1000)+"W PoE)", (budget.poe==data.adminPower)) %></td>
+      <% }) %>
+    </tr>
+    </table>
+    <%= BlockTwoColBot() %>
+  </td>
+</tr>
+</table>
+<% } %>
+
+<% if (!IsUndefOrNull(data.unintr)) { %>
+<table>
+<tr class="detailsAreaContainer">
+  <td>
+    <%= BlockTwoColTop(lang('poe','titUnintr'),'poeUnintr') %>
+    <table>
+    <tr>
+      <td><%= Radio('unintr', 0, lang('common','txtDisable'), (data.unintr==0)) %></td>
+      <td><%= Radio('unintr', 1, lang('common','txtEnable'), (data.unintr==1)) %></td>
+    </tr>
+    </table>
+    <%= BlockTwoColBot() %>
+  </td>
+</tr>
+</table>
+<% } %>
+
+<%= BlockEntryTableTop(lang('poe','titPoEConf'), 'poeConfiguration') %>
+<table class="dataTable entry">
+<thead>
+<tr>
+  <td><%= TableCheckboxAll() %></td>
+  <td><%= lang('poe','txtSWVersion') %></td>
+  <td><%= lang('poe','txtPowerStatus') %></td>
+  <td><%= lang('poe','txtNominalPower') %></td>
+  <td><%= lang('poe','txtThresholdPower') %></td>
+  <td><%= lang('poe','txtConsumedPower') %></td>
+  <td><%= lang('poe','txtPowerThresholdTD', [data.threshold_min, data.threshold_max]) %></td>
+  <td><%= lang('poe','txtPowerMethod') %></td>
+  <td><%= lang('poe','txtTrapState') %></td>
+</tr>
+<tr>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><%= InputTextDigit('threshold', '', 3) %></td>
+  <td><%= Select('pm', -1, selEntries_pm) %></td>
+  <td><%= SelectState('trapState', -1) %></td>
+</tr>
+</thead>
+<tbody>
+  <% _.each(data.units, function(unit, idx) { %>
+  <tr>
+    <td><%= TableCheckbox(idx) %></td>
+    <td><%= show(unit.swVer) %></td>
+    <td><%= show(unit.operStatus) %></td>
+    <td><%= show(unit.nominalPower) %></td>
+    <td><%= show(unit.thresholdPower) %></td>
+    <td><%= show(unit.consumedPower) %></td>
+    <td><%= unit.threshold %></td>
+    <td><%= GetSelectName(unit.pm, selEntries_pm) %></td>
+    <td><%= GetSelectName(unit.trapState, selEntries_State) %></td>
+  </tr>
+  <% }) %>
+</tbody>
+</table>
+<%= BlockEntryTableBot() %>
+
+</div>
+</script>
+
+</body>
+
+</html>
